@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2b3dae">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+*{box-sizing:border-box}
+html{color-scheme:light dark}
+body{margin:0;font:14px system-ui,-apple-system,sans-serif}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+<title>Штриховая мастерская</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: phone-first single column, four screens swapped in place, build control pinned under the form */
+:root{
+  --paper:#f0f1ed;--card:#ffffff;--ink:#16181a;--soft:#5a6066;--rule:#d6d9d1;
+  --accent:#2b3dae;--accent-soft:#e4e7fa;--warn:#9a3412;--warn-soft:#fbeae1;--ok:#1f6f45;
+  --on-accent:#ffffff;
+  --display:"Instrument Serif",Georgia,serif;
+  --body:"Public Sans",system-ui,-apple-system,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#121316;--card:#1b1d20;--ink:#e9eae5;--soft:#9aa0a6;--rule:#2d3034;
+    --accent:#9aa8ff;--accent-soft:#232742;--warn:#f0a070;--warn-soft:#2e2219;--ok:#6fd49b;
+    --on-accent:#121316;color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#121316;--card:#1b1d20;--ink:#e9eae5;--soft:#9aa0a6;--rule:#2d3034;
+  --accent:#9aa8ff;--accent-soft:#232742;--warn:#f0a070;--warn-soft:#2e2219;--ok:#6fd49b;
+  --on-accent:#121316;color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;margin:0;display:flex;flex-direction:column}
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--paper);border-bottom:1px solid var(--rule);padding:12px 14px 0;display:flex;flex-direction:column;gap:9px}
+.brand{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
+.brand h1{font-family:var(--display);font-weight:400;font-size:25px;margin:0;line-height:1}
+.brand span{font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:var(--soft)}
+nav{display:flex;gap:1px}
+nav button{flex:1;background:none;border:none;border-bottom:2px solid transparent;font-family:var(--body);font-size:12.5px;font-weight:600;color:var(--soft);padding:9px 2px;cursor:pointer;position:relative}
+nav button[aria-selected="true"]{color:var(--accent);border-bottom-color:var(--accent)}
+nav button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+nav .dot{display:inline-block;min-width:16px;padding:0 4px;margin-left:4px;background:var(--warn);color:var(--paper);border-radius:8px;font-size:10px;line-height:16px;vertical-align:1px}
+main{flex:1;overflow-y:auto;padding:16px 14px 32px;min-width:0}
+.screen{display:flex;flex-direction:column;gap:16px;min-width:0}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+label{font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;font-weight:700;color:var(--soft)}
+.hint{font-size:12.5px;color:var(--soft);margin:0}
+input[type=text],textarea,select{font-family:var(--body);font-size:16px;color:var(--ink);background:var(--card);border:1px solid var(--rule);border-radius:4px;padding:10px 12px;width:100%;min-width:0}
+textarea{resize:vertical;min-height:74px;line-height:1.5}
+input:focus,textarea:focus,select:focus{outline:2px solid var(--accent);outline-offset:-1px;border-color:var(--accent)}
+.row{display:flex;gap:9px;min-width:0;flex-wrap:wrap}
+.row>*{flex:1 1 150px;min-width:0}
+.btn{font-family:var(--body);font-size:15px;font-weight:600;background:var(--accent);color:var(--on-accent);border:none;border-radius:4px;padding:13px 16px;cursor:pointer;width:100%}
+.btn:disabled{opacity:.5;cursor:default}
+.btn.ghost{background:none;color:var(--accent);border:1px solid var(--rule)}
+.btn.small{font-size:12px;padding:7px 11px;width:auto;flex:0 0 auto}
+.btn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.buildbox{display:flex;flex-direction:column;gap:8px;background:var(--card);border:1px solid var(--rule);border-radius:5px;padding:12px}
+.status{font-size:13px;color:var(--soft);min-height:19px}
+.status.err{color:var(--warn)}
+.flag{background:var(--warn-soft);border-left:2px solid var(--warn);padding:11px 13px;font-size:13.5px;border-radius:0 4px 4px 0;display:flex;flex-direction:column;gap:9px}
+.flag b{font-size:11px;letter-spacing:.07em;text-transform:uppercase}
+.out{display:flex;flex-direction:column;gap:6px;min-width:0;margin-bottom:16px}
+.outhead{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.outhead h3{margin:0;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--soft);font-weight:700;flex:1 1 auto}
+.cnt{font-family:var(--mono);font-size:11px;color:var(--ok);font-variant-numeric:tabular-nums}
+.cnt.over{color:var(--warn);font-weight:600}
+textarea.slab{background:var(--card);border:1px solid var(--rule);border-left:2px solid var(--accent);border-radius:0 4px 4px 0;font-family:var(--mono);font-size:12.5px;line-height:1.6;padding:11px 13px;min-height:60px;overflow:hidden;resize:none}
+ul.list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+ul.list li{background:var(--card);border:1px solid var(--rule);border-radius:4px;padding:11px 13px;display:flex;align-items:center;gap:9px;flex-wrap:wrap;min-width:0}
+ul.list .nm{flex:1 1 120px;min-width:0;font-weight:600;overflow-wrap:anywhere}
+.empty{border:1px dashed var(--rule);border-radius:4px;padding:22px 16px;text-align:center;color:var(--soft);font-size:14px}
+.chip{display:inline-block;font-size:10px;letter-spacing:.07em;text-transform:uppercase;background:var(--accent-soft);color:var(--accent);padding:3px 7px;border-radius:3px;font-weight:700}
+hr.divider{height:1px;background:var(--rule);border:0;margin:0}
+.note{font-size:12.5px;color:var(--soft);margin:0}
+.term{background:var(--card);border:1px solid var(--rule);border-radius:4px;padding:12px 13px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.term .src{font-weight:600;overflow-wrap:anywhere}
+.term .ctx{font-size:12.5px;color:var(--soft);overflow-wrap:anywhere}
+.term .ctx em{font-style:normal;background:var(--warn-soft);color:var(--ink);padding:0 3px;border-radius:2px}
+.term .where{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--accent);font-weight:700}
+h2.sec{font-family:var(--display);font-weight:400;font-size:24px;margin:0;line-height:1.1}
+</style>
+
+</head>
+<body>
+<div class="topbar">
+  <div class="brand"><h1>Штриховая мастерская</h1><span id="badge">офлайн</span></div>
+  <nav role="tablist">
+    <button role="tab" id="tab-edit" aria-selected="true">Персонаж</button>
+    <button role="tab" id="tab-out" aria-selected="false">Промпты</button>
+    <button role="tab" id="tab-dict" aria-selected="false">Словарь<span class="dot" id="dict-dot" hidden></span></button>
+    <button role="tab" id="tab-list" aria-selected="false">Архив</button>
+  </nav>
+</div>
+
+<main>
+
+<!-- ПЕРСОНАЖ -->
+<div class="screen" id="screen-edit">
+  <div class="field">
+    <label for="f-name">Имя персонажа</label>
+    <input type="text" id="f-name" placeholder="Юна Кесслер" autocomplete="off">
+  </div>
+
+  <div class="row">
+    <div class="field">
+      <label for="f-style">Стиль рисовки</label>
+      <select id="f-style">
+        <option value="dark">Dark — тяжёлый штрих</option>
+        <option value="casual">Casual — светлый, цветной</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="f-sex">Персонаж</label>
+      <select id="f-sex">
+        <option value="woman">Женщина</option>
+        <option value="man">Мужчина</option>
+      </select>
+    </div>
+  </div>
+  <p class="hint" id="style-note"></p>
+
+  <hr class="divider">
+
+  <div class="field">
+    <label for="f-look">Внешность</label>
+    <p class="hint">Возраст, телосложение, лицо, глаза, волосы. Через запятую.</p>
+    <textarea id="f-look" placeholder="23 года, стройная, большие глаза, круглые очки, веснушки, тёмно-рыжие волосы, пучок"></textarea>
+  </div>
+  <div class="field">
+    <label for="f-mood">Выражение</label>
+    <textarea id="f-mood" placeholder="смущённая улыбка, сильный румянец, брови домиком"></textarea>
+  </div>
+  <div class="field">
+    <label for="f-wear">Одежда и аксессуары</label>
+    <p class="hint">Четыре-шесть предметов, не больше.</p>
+    <textarea id="f-wear" placeholder="кремовый свитер, плиссированная юбка, колготки, ботинки, сумка"></textarea>
+  </div>
+  <div class="field">
+    <label for="f-pose">Поза</label>
+    <textarea id="f-pose" placeholder="облокотилась, подбородок поднят, смотрит в камеру"></textarea>
+  </div>
+  <div class="field">
+    <label for="f-scene">Место</label>
+    <textarea id="f-scene" placeholder="кофейня, утро, свет из окна"></textarea>
+  </div>
+
+  <div class="buildbox">
+    <div class="field">
+      <label for="f-mode">Способ сборки</label>
+      <select id="f-mode">
+        <option value="local">Локально — словарь, офлайн</option>
+        <option value="claude">Через Claude — перевод и переформулировка</option>
+      </select>
+    </div>
+    <p class="hint" id="mode-note"></p>
+    <button class="btn" id="btn-build">Создать</button>
+    <div class="status" id="st-build"></div>
+  </div>
+</div>
+
+<!-- ПРОМПТЫ -->
+<div class="screen" id="screen-out" hidden>
+  <p class="note" id="out-meta"></p>
+
+  <div class="flag" id="unknown-flag" hidden>
+    <b>Приложение не поняло часть фраз</b>
+    <span id="unknown-count"></span>
+    <button class="btn small ghost" id="btn-to-dict">Перевести их</button>
+  </div>
+
+  <p class="note">Текст ниже можно править прямо здесь — правки сохранятся вместе с персонажем.</p>
+
+  <div class="out">
+    <div class="outhead"><h3>Appearance</h3><span class="cnt" id="c-app"></span><button class="btn ghost small" data-copy="o-app">Копировать</button></div>
+    <textarea class="slab" id="o-app" spellcheck="false"></textarea>
+  </div>
+  <div class="out">
+    <div class="outhead"><h3>Clothing &amp; Accessories</h3><span class="cnt" id="c-clo"></span><button class="btn ghost small" data-copy="o-clo">Копировать</button></div>
+    <textarea class="slab" id="o-clo" spellcheck="false"></textarea>
+  </div>
+  <div class="out">
+    <div class="outhead"><h3>Action &amp; Background</h3><span class="cnt" id="c-act"></span><button class="btn ghost small" data-copy="o-act">Копировать</button></div>
+    <textarea class="slab" id="o-act" spellcheck="false"></textarea>
+  </div>
+  <div class="out">
+    <div class="outhead"><h3>Negative Prompt</h3><span class="cnt" id="c-neg"></span><button class="btn ghost small" data-copy="o-neg">Копировать</button></div>
+    <textarea class="slab" id="o-neg" spellcheck="false"></textarea>
+  </div>
+  <div class="out">
+    <div class="outhead"><h3>Портрет</h3><span class="cnt" id="c-por"></span><button class="btn ghost small" data-copy="o-por">Копировать</button></div>
+    <textarea class="slab" id="o-por" spellcheck="false"></textarea>
+  </div>
+
+  <div class="row">
+    <button class="btn ghost" data-copy="ALL">Копировать всё</button>
+    <button class="btn" id="btn-save">Сохранить</button>
+  </div>
+  <div class="status" id="st-save"></div>
+  <p class="note">Соотношение сторон: 832×1216 или 3:4. Уже — начнёт резать голову.</p>
+</div>
+
+<!-- СЛОВАРЬ -->
+<div class="screen" id="screen-dict" hidden>
+
+  <div id="pending-wrap" hidden>
+    <h2 class="sec">Непонятые фразы</h2>
+    <p class="hint">Напишите английский вариант. Он сохранится и дальше будет подставляться сам.</p>
+    <div id="pending-list" style="display:flex;flex-direction:column;gap:10px;margin-top:12px"></div>
+    <div class="row" style="margin-top:12px">
+      <button class="btn" id="btn-learn">Запомнить и пересобрать</button>
+      <button class="btn ghost" id="btn-skip">Пропустить</button>
+    </div>
+    <div class="status" id="st-learn"></div>
+    <hr class="divider" style="margin:18px 0">
+  </div>
+
+  <h2 class="sec">Мои термины</h2>
+  <p class="hint">Всё, что вы добавили. Эти записи имеют приоритет над встроенным словарём.</p>
+
+  <div class="row">
+    <input type="text" id="add-ru" placeholder="русская фраза" autocomplete="off">
+    <input type="text" id="add-en" placeholder="english phrase" autocomplete="off">
+  </div>
+  <button class="btn ghost" id="btn-add">Добавить термин</button>
+
+  <ul class="list" id="dict-list"></ul>
+  <div class="empty" id="dict-empty">Пока ничего не добавлено.</div>
+
+  <hr class="divider">
+  <div class="row">
+    <button class="btn ghost small" id="btn-export">Показать для копирования</button>
+    <button class="btn ghost small" id="btn-clear">Очистить мои термины</button>
+  </div>
+  <textarea class="slab" id="dict-export" hidden spellcheck="false"></textarea>
+  <p class="note">Встроенных терминов: <span id="base-count"></span>.</p>
+</div>
+
+<!-- АРХИВ -->
+<div class="screen" id="screen-list" hidden>
+  <ul class="list" id="char-list"></ul>
+  <div class="empty" id="list-empty">Пока пусто. Соберите персонажа и нажмите «Сохранить».</div>
+</div>
+
+</main>
+
+<script>
+/* Русско-английский словарь терминов для промптов. Длинные фразы ищутся раньше коротких. */
+var DICT = {
+/* возраст и телосложение */
+"18 лет":"eighteen years old","19 лет":"nineteen years old","20 лет":"twenty years old",
+"21 год":"twenty one years old","22 года":"twenty two years old","23 года":"twenty three years old",
+"24 года":"twenty four years old","25 лет":"twenty five years old","26 лет":"twenty six years old",
+"27 лет":"twenty seven years old","28 лет":"twenty eight years old","29 лет":"twenty nine years old",
+"30 лет":"thirty years old","31 год":"thirty one years old","35 лет":"thirty five years old",
+"молодая женщина":"young adult woman","взрослая женщина":"adult woman","молодой мужчина":"young adult man",
+"взрослый мужчина":"adult man","девушка":"young adult woman","парень":"young adult man",
+"женщина":"adult woman","мужчина":"adult man",
+"высокая":"tall","высокий":"tall","невысокая":"of average height","стройная":"slim","стройный":"slim",
+"худая":"slender","худощавый":"lean","подтянутая":"athletic","подтянутый":"athletic",
+"спортивная":"athletic build","мускулистый":"muscular","жилистый":"wiry",
+"пышная фигура":"curvy hourglass figure","пышные формы":"curvy hourglass figure",
+"песочные часы":"hourglass figure","узкая талия":"narrow waist","широкие бёдра":"wide hips",
+"широкие плечи":"broad shoulders","длинные ноги":"long legs","хрупкая":"delicate frame",
+"плотного телосложения":"sturdy build","мягкие формы":"soft curves",
+/* лицо */
+"круглое лицо":"soft round face","овальное лицо":"oval face","худое лицо":"angular face",
+"острые скулы":"high cheekbones","высокие скулы":"high cheekbones","острая челюсть":"sharp jawline",
+"мягкие черты":"soft features","резкие черты":"sharp features",
+"полные губы":"full lips","пухлые губы":"puff thick lips","тонкие губы":"thin mouth",
+"блеск для губ":"glossed lips","красная помада":"red lipstick","тёмная помада":"dark matte lipstick",
+"прямой нос":"straight nose","курносый нос":"small upturned nose","маленький нос":"small nose",
+"веснушки":"freckles across the nose","родинка":"a small beauty mark","ямочки":"dimples",
+"шрам":"a thin scar","шрам на брови":"a thin scar through one eyebrow","шрам на щеке":"a scar across one cheek",
+"синяк":"a bruise","разбитая губа":"a split lip","круги под глазами":"dark circles under the eyes",
+"румянец":"a blush across the nose","сильный румянец":"a deep blush across the face and ears",
+"бледная кожа":"pale skin","очень бледная кожа":"porcelain pale skin","загорелая кожа":"warm tanned skin",
+"смуглая кожа":"olive skin","тёмная кожа":"deep brown skin","светлая кожа":"fair skin",
+"обветренная кожа":"weathered skin",
+/* глаза и брови */
+"большие глаза":"large expressive eyes","круглые глаза":"large round eyes",
+"узкие глаза":"narrow eyes","тяжёлые веки":"heavy lidded eyes",
+"длинные ресницы":"long thick lashes","очки":"round thin wire glasses",
+"круглые очки":"round tortoiseshell glasses","квадратные очки":"square framed glasses",
+"голубые глаза":"pale blue eyes","синие глаза":"deep blue eyes","зелёные глаза":"pale green eyes",
+"карие глаза":"warm brown eyes","тёмные глаза":"dark eyes","серые глаза":"grey eyes",
+"янтарные глаза":"amber eyes","ореховые глаза":"hazel eyes","фиолетовые глаза":"violet eyes",
+"разные глаза":"mismatched eyes","светящиеся глаза":"faintly glowing eyes",
+"густые брови":"thick eyebrows","тонкие брови":"thin arched eyebrows",
+"брови домиком":"eyebrows drawn up in the middle","сдвинутые брови":"eyebrows drawn together",
+/* волосы */
+"рыжие волосы":"ginger hair","тёмно-рыжие волосы":"dark auburn hair","медные волосы":"copper hair",
+"светлые волосы":"blonde hair","платиновые волосы":"platinum blonde hair","пепельные волосы":"ash blonde hair",
+"русые волосы":"light brown hair","каштановые волосы":"chestnut brown hair","тёмные волосы":"dark brown hair",
+"чёрные волосы":"black hair","белые волосы":"white hair","седые волосы":"grey hair",
+"розовые волосы":"coral pink hair","синие волосы":"cobalt blue hair","зелёные волосы":"green hair",
+"фиолетовые волосы":"violet hair","рыжая прядь":"one bright streak","белая прядь":"one white streak",
+"длинные волосы":"long hair past the shoulders","очень длинные волосы":"very long hair past the waist",
+"короткие волосы":"short hair","каре":"a chin length bob","рваное каре":"a choppy chin length bob",
+"стрижка пикси":"a short pixie cut","до плеч":"shoulder length hair",
+"прямые волосы":"straight hair","волнистые волосы":"wavy hair","кудрявые волосы":"curly hair",
+"вьющиеся волосы":"tightly coiled hair","растрёпанные волосы":"messy tousled hair",
+"пучок":"hair in a messy bun","высокий хвост":"hair in a high ponytail","низкий хвост":"hair tied back low",
+"две косы":"hair in two braids","коса":"a single long braid","чёлка":"a blunt fringe",
+"без чёлки":"centre parted with no fringe","пряди у лица":"two long strands framing the face",
+"выбритые виски":"shaved sides and a faded undercut","собраны кожаным шнурком":"tied back with a leather cord",
+/* выражения */
+"улыбка":"a warm smile","лёгкая улыбка":"a faint smile","широкая улыбка":"a wide open grin",
+"кривая усмешка":"a crooked half smile","усмешка":"a knowing half smile",
+"виноватая улыбка":"an apologetic guilty smile","смущённая улыбка":"a shy embarrassed smile",
+"натянутая улыбка":"a tight polite smile","довольная":"delighted expression",
+"испуганная":"a frightened expression","тревожная":"an anxious expression",
+"удивлённая":"a startled expression","злая":"a furious expression",
+"усталая":"an exhausted expression","спокойная":"a calm steady expression",
+"серьёзная":"a serious expression","решительная":"a determined expression",
+"надменная":"a haughty expression","насмешливая":"an amused mocking expression",
+"растерянная":"a bewildered expression","смотрит в камеру":"looking directly at the viewer",
+"смотрит вниз":"looking down","смотрит исподлобья":"looking up from under her brow",
+"смотрит через плечо":"looking back over her shoulder","отводит взгляд":"looking away",
+"приоткрытый рот":"lips parted","стиснутые зубы":"teeth gritted","закушенная губа":"biting her lower lip",
+"слёзы на глазах":"eyes bright with tears","капля пота":"a bead of sweat at the temple",
+/* одежда верх */
+"рубашка":"a plain shirt","белая рубашка":"a crisp white shirt","блузка":"a linen blouse",
+"футболка":"a plain t-shirt","топ":"a fitted top","водолазка":"a turtleneck",
+"свитер":"a knit sweater","оверсайз свитер":"an oversized knit sweater",
+"кардиган":"a soft knit cardigan","худи":"a faded oversized hoodie",
+"жилет":"a laced leather bodice vest","корсет":"a laced bodice",
+"пиджак":"a tailored jacket","кожаная куртка":"a worn leather jacket",
+"пальто":"a long wool coat","плащ":"a long travel coat","шинель":"a heavy greatcoat",
+"мантия":"a draped robe","накидка":"a cloak","меховой воротник":"a fur lined collar",
+/* одежда низ и платья */
+"платье":"a dress","длинное платье":"a floor length dress","короткое платье":"a short dress",
+"коктейльное платье":"a cocktail dress","сарафан":"a pinafore dress",
+"юбка":"a skirt","плиссированная юбка":"a pleated skirt","длинная юбка":"a long skirt",
+"джинсы":"slim denim jeans","брюки":"slim trousers","штаны":"loose trousers",
+"леггинсы":"black leggings","шорты":"soft shorts","комбинезон":"a work jumpsuit",
+/* обувь и прочее */
+"ботинки":"heavy leather boots","сапоги":"tall riding boots","туфли":"plain flat shoes",
+"каблуки":"heeled shoes","кроссовки":"canvas trainers","босиком":"bare feet",
+"чулки":"stockings","колготки":"tights","носки":"thick socks","перчатки":"leather gloves",
+"митенки":"fingerless gloves","фартук":"a canvas apron","шарф":"a knitted scarf",
+"пояс":"a wide belt","ремень":"a leather belt",
+/* броня */
+"доспех":"steel armour","кираса":"a steel breastplate","кольчуга":"a mail shirt",
+"наплечники":"pauldrons","наручи":"vambraces","поддоспешник":"a padded gambeson",
+"шлем":"a helm","щит":"a round shield","меч":"a plain sword","кинжал":"a dagger",
+"лук":"a longbow","посох":"a wooden staff",
+/* аксессуары */
+"очки на носу":"glasses slipping down her nose","серьги":"small stud earrings",
+"кольца серьги":"large gold hoop earrings","цепочка":"a thin chain necklace",
+"кулон":"a small pendant","ошейник":"a plain leather collar","чокер":"a black velvet choker",
+"браслеты":"thin bracelets","кольца":"silver rings","часы":"a plain watch",
+"сумка":"a canvas bag","рюкзак":"a worn backpack","значок":"a small enamel badge",
+"бейдж":"a name badge","резинка на запястье":"a scrunchie on one wrist",
+"длинные ногти":"long almond nails","обкусанные ногти":"short bitten nails",
+"татуировки":"fine line tattoos","татуировки на руках":"fine line tattoos on both hands",
+/* цвета */
+"чёрный":"black","белый":"white","серый":"grey","тёмно-серый":"charcoal grey",
+"красный":"red","бордовый":"deep burgundy","розовый":"pink","оранжевый":"warm orange",
+"жёлтый":"mustard yellow","золотой":"gold","зелёный":"green","оливковый":"olive green",
+"голубой":"pale blue","синий":"deep blue","тёмно-синий":"navy blue","бирюзовый":"teal",
+"фиолетовый":"violet","коричневый":"brown","бежевый":"cream","кремовый":"cream",
+"ржавый":"rust orange","серебряный":"silver",
+/* позы */
+"стоит":"standing","стоит прямо":"standing straight","стоит вполоборота":"standing in three quarter view",
+"сидит":"sitting","сидит на стуле":"sitting in a chair","сидит на краю":"sitting on the edge",
+"сидит на полу":"sitting on the floor","на коленях":"kneeling",
+"идёт":"walking","бежит":"running","наклонилась вперёд":"leaning forward",
+"облокотилась":"leaning on her elbows","прислонилась к стене":"leaning against a wall",
+"руки скрещены":"arms folded","руки в карманах":"hands in her pockets",
+"руки на бёдрах":"hands on her hips","руки сложены":"hands folded in front of her",
+"обхватила себя":"arms wrapped around herself","тянет рукав":"tugging at her sleeve",
+"указывает пальцем":"pointing at the viewer","тянется рукой":"reaching out",
+"держит":"holding","несёт поднос":"carrying a tray","закрывает лицо":"hiding her face in her hands",
+"вес на одной ноге":"weight on one leg","плечи опущены":"shoulders dropped",
+"плечи подняты":"shoulders drawn up","подбородок поднят":"chin raised",
+"голова склонена":"head tilted","спиной":"turned away from the viewer",
+/* места */
+"таверна":"a warm tavern interior","кухня":"a small kitchen","квартира":"a small flat",
+"спальня":"a bedroom","гостиная":"a living room","ванная":"a bathroom",
+"кофейня":"a small coffee shop","бар":"a dim bar","ресторан":"a restaurant",
+"офис":"an office","библиотека":"a library","архив":"a document archive",
+"классная комната":"a classroom","магазин":"a small shop","склад":"a warehouse",
+"мастерская":"a workshop","кузница":"a forge","лаборатория":"a laboratory",
+"коридор":"a panelled corridor","лестница":"a stairwell","дверной проём":"a doorway",
+"улица":"a city street","переулок":"a narrow alley","площадь":"a town square",
+"крепостная стена":"a fortress wall","замок":"a castle hall","тронный зал":"a throne room",
+"бальный зал":"a grand ballroom","храм":"a temple","руины":"stone ruins",
+"лес":"a forest","поле":"an open field","горы":"mountains","берег моря":"a sea shore",
+"гавань":"a harbour","корабль":"a ship deck","пещера":"a cave","подвал":"a cellar",
+"космический корабль":"a spaceship interior","крыша":"a rooftop","парк":"a park",
+"тренажёрный зал":"a gym","студия":"a studio","гримёрка":"a dressing room",
+/* свет и время */
+"утро":"morning light","день":"daylight","вечер":"evening light","ночь":"night",
+"закат":"sunset light","рассвет":"dawn light","солнечный свет":"bright sunlight",
+"мягкий свет":"soft light","тёплый свет":"warm light","холодный свет":"cool light",
+"свет лампы":"lamplight","свет свечи":"candlelight","свет из окна":"light through a window",
+"свет экрана":"the glow of a screen","факелы":"burning torches","люстра":"a chandelier",
+"полумрак":"dim light","тени":"deep shadows","туман":"mist","дождь":"rain",
+"снег":"falling snow","ветер":"wind"
+};
+
+
+var TAILS = {
+  dark:{
+    app:"ink on paper, pen and ink drawing, (heavy cross-hatching:1.4), (bold black ink outline:1.3), flat matte colour, no rendering, solo, one figure alone, full body head to toe, realistic adult proportions, detailed adult face",
+    clo:"pen and ink, heavy cross-hatching, hatched fabric folds, flat matte colour, one outfit",
+    act:"pen and ink drawing, heavy cross-hatching, visible linework, flat matte tones",
+    end:"fully inked background, lighter hatching behind the figure, no border, no frame, no text",
+    por:"ink on paper, pen and ink drawing, heavy cross-hatching, bold black ink outline, flat matte colour",
+    tailWear:"no shine"
+  },
+  casual:{
+    app:"ink and flat colour illustration, clean bold black ink outline, variable line weight, light open cross-hatching, bright warm palette, solo, one figure alone, full body head to toe, realistic adult proportions, detailed face",
+    clo:"clean bold black ink outline, light open cross-hatching, bright saturated flat colours, one outfit",
+    act:"clean bold black ink outline, light open cross-hatching, bright saturated flat colours, sunny light",
+    end:"light airy background, minimal shadow, no border, no frame, no text",
+    por:"ink and flat colour illustration, clean bold black ink outline, light open cross-hatching, bright warm palette",
+    tailWear:"no logos, no prints"
+  }
+};
+var NEG = "blurry, low quality, deformed hands, extra fingers";
+var FIELD_NAMES = {look:"Внешность",mood:"Выражение",wear:"Одежда",pose:"Поза",scene:"Место"};
+
+var $=function(id){return document.getElementById(id)};
+var state={result:null,editingId:null,pending:[],lastForm:null};
+
+/* ---------- пользовательский словарь ---------- */
+function userDict(){try{return JSON.parse(localStorage.getItem("forge-userdict")||"{}")}catch(e){return {}}}
+function userDictPut(o){try{localStorage.setItem("forge-userdict",JSON.stringify(o))}catch(e){}}
+var KEYS_CACHE=null;
+function allKeys(){
+  if(KEYS_CACHE) return KEYS_CACHE;
+  var u=userDict(),m={},k;
+  for(k in DICT) m[k]=DICT[k];
+  for(k in u) m[k]=u[k];
+  KEYS_CACHE={map:m,keys:Object.keys(m).sort(function(a,b){return b.length-a.length})};
+  return KEYS_CACHE;
+}
+function dictChanged(){KEYS_CACHE=null;paintDict();updateDot()}
+
+/* ---------- вкладки ---------- */
+var tabs=[["tab-edit","screen-edit"],["tab-out","screen-out"],["tab-dict","screen-dict"],["tab-list","screen-list"]];
+tabs.forEach(function(t){$(t[0]).addEventListener("click",function(){show(t[0])})});
+function show(id){
+  tabs.forEach(function(t){
+    var on=t[0]===id;
+    $(t[0]).setAttribute("aria-selected",on?"true":"false");
+    $(t[1]).hidden=!on;
+  });
+  document.querySelector("main").scrollTop=0;
+  if(id==="tab-out") setTimeout(autosizeAll,0);
+}
+
+function styleNote(){
+  $("style-note").textContent = $("f-style").value==="dark"
+    ? "Плотный чёрный, глубокая штриховка, приглушённый цвет. Драма, фэнтези, ночь."
+    : "Открытый штрих, много воздуха, насыщенный цвет. Современность, комедия, романтика.";
+}
+function modeNote(){
+  $("mode-note").textContent = $("f-mode").value==="local"
+    ? "Переводит по словарю. Без интернета и без аккаунта. Непонятые фразы предложит перевести и запомнит."
+    : "Переводит и переписывает в язык промптов. Нужен интернет, вход в Claude и доступ к сервису; тратит ваш лимит.";
+}
+$("f-style").addEventListener("change",styleNote);
+$("f-mode").addEventListener("change",function(){modeNote();saveDraft()});
+styleNote();modeNote();
+
+/* ---------- черновик ---------- */
+var FIELDS=["f-name","f-style","f-sex","f-mode","f-look","f-mood","f-wear","f-pose","f-scene"];
+function saveDraft(){try{var d={};FIELDS.forEach(function(k){d[k]=$(k).value});localStorage.setItem("forge-draft",JSON.stringify(d))}catch(e){}}
+function loadDraft(){try{var d=JSON.parse(localStorage.getItem("forge-draft")||"{}");FIELDS.forEach(function(k){if(d[k]!=null)$(k).value=d[k]});styleNote();modeNote()}catch(e){}}
+FIELDS.forEach(function(k){$(k).addEventListener("input",saveDraft);$(k).addEventListener("change",saveDraft)});
+loadDraft();
+
+/* ---------- перевод ---------- */
+function normalize(s){return s.toLowerCase().replace(/\s+/g," ").trim().replace(/[.,;!?]+$/,"")}
+var COLOR_RE=/^(black|white|grey|charcoal grey|red|deep burgundy|pink|warm orange|mustard yellow|gold|green|olive green|pale blue|deep blue|navy blue|teal|violet|brown|cream|rust orange|silver)\s+(a|an)\s+/;
+function tidyArticle(s){var m=s.match(COLOR_RE);return m? m[2]+" "+m[1]+" "+s.slice(m[0].length) : s}
+
+function translateChunk(chunk, field, unknown){
+  var A=allKeys(), MAP=A.map, KEYS=A.keys;
+  var c=normalize(chunk);
+  if(!c) return "";
+  if(MAP[c]) return MAP[c];
+  var rest=c,out=[],used=false;
+  for(var i=0;i<KEYS.length;i++){
+    var k=KEYS[i];
+    if(k.length<4) continue;
+    if(rest.indexOf(k)!==-1){
+      out.push(MAP[k]);
+      rest=rest.split(k).join(" ").replace(/\s+/g," ").trim();
+      used=true;
+      if(!rest) break;
+    }
+  }
+  if(!used){
+    if(/[а-яё]/i.test(c)) unknown.push({phrase:chunk.trim(),norm:c,field:field,context:chunk.trim()});
+    return chunk.trim();
+  }
+  if(rest && /[а-яё]/i.test(rest)) unknown.push({phrase:rest,norm:rest,field:field,context:chunk.trim()});
+  if(rest) out.push(rest);
+  return tidyArticle(out.join(" "));
+}
+function translateField(text, field, unknown){
+  if(!text) return [];
+  return text.split(/[,\n;]+/).map(function(c){return translateChunk(c,field,unknown)}).filter(function(s){return s&&s.trim()});
+}
+function join(parts){return parts.filter(function(s){return s&&String(s).trim()}).map(function(s){return String(s).trim().replace(/\s+/g," ")}).join(", ")}
+function clip(s){if(s.length<=500)return s;var cut=s.lastIndexOf(", ",497);return cut>100? s.slice(0,cut) : s.slice(0,497)}
+
+function localBuild(v){
+  var t=TAILS[v.style];
+  var who=v.sex==="man"?"one man alone":"one woman alone";
+  var unknown=[];
+  var look=translateField(v.look,"look",unknown);
+  var mood=translateField(v.mood,"mood",unknown);
+  var wear=translateField(v.wear,"wear",unknown);
+  var pose=translateField(v.pose,"pose",unknown);
+  var scene=translateField(v.scene,"scene",unknown);
+  var seen={};
+  state.pending=unknown.filter(function(u){
+    if(!u.norm||seen[u.norm])return false;seen[u.norm]=true;return true;
+  });
+  return {
+    appearance: clip(join([t.app.replace("one figure alone",who)].concat(look).concat(mood))),
+    clothing:   clip(join([t.clo].concat(wear).concat([t.tailWear]))),
+    action:     clip(join([t.act].concat(pose).concat(scene).concat([t.end]))),
+    negative:   NEG,
+    portrait:   clip(join([t.por,"upper body portrait","close framing","entire head visible","detailed face"].concat(mood).concat(look.slice(0,6)).concat(["blurred background"]).concat(scene.slice(0,2))))
+  };
+}
+
+/* ---------- Claude ---------- */
+var claudePromise = (window.claude && window.claude.use)
+  ? window.claude.use("sample").catch(function(){return null})
+  : Promise.resolve(null);
+claudePromise.then(function(s){ if(s) $("badge").textContent="claude доступен"; });
+
+function buildInstruction(v){
+  var t=TAILS[v.style];
+  var who=v.sex==="man"?"one man alone":"one woman alone";
+  return [
+"You write prompts for an AI image generator, for a character card. Output JSON only.",
+"",
+"HARD RULES:",
+"1. Every block is 500 characters or fewer. Strict platform limit.",
+"2. Each block begins with its opener, copied verbatim:",
+"   appearance: "+t.app.replace("one figure alone",who),
+"   clothing: "+t.clo,
+"   action: "+t.act,
+"   portrait: "+t.por,
+"3. The action block ends with exactly: "+t.end,
+"4. Comma-separated lowercase phrases. No sentences, no line breaks, no full stops.",
+"5. Adult proportions stated explicitly. Never any wording implying a child.",
+"6. Name the colour of the single most important garment twice.",
+"7. Order inside a block: opener, framing and pose, face and hair, then the rest.",
+"8. Background: a few concrete words. Never 'plain simple background', never 'minimal background detail'.",
+"9. No gloss or rendering words (glossy, shiny, reflections, polished).",
+"10. No sexualised framing, no revealing clothing, no camera focus on the body.",
+"11. Keep every concrete detail the user gave. Invent nothing beyond connective wording.",
+"",
+"The notes may be in Russian. Translate into natural English prompt language and fix wording.",
+"",
+"NOTES",
+"name: "+(v.name||"-"),
+"appearance: "+(v.look||"-"),
+"expression: "+(v.mood||"-"),
+"clothing: "+(v.wear||"-"),
+"pose: "+(v.pose||"-"),
+"place: "+(v.scene||"-"),
+"",
+"The portrait block is a separate upper-body shot: close framing, entire head visible, the",
+"expression, face and hair, the collar of the outfit, a blurred version of the place.",
+"No footwear, no bags, nothing below the chest.",
+"",
+'JSON shape: {"appearance":"...","clothing":"...","action":"...","portrait":"...","notes":"one short sentence in Russian about what you fixed"}'
+  ].join("\n");
+}
+
+function readForm(){
+  return {name:$("f-name").value.trim(),style:$("f-style").value,sex:$("f-sex").value,mode:$("f-mode").value,
+    look:$("f-look").value.trim(),mood:$("f-mood").value.trim(),wear:$("f-wear").value.trim(),
+    pose:$("f-pose").value.trim(),scene:$("f-scene").value.trim()};
+}
+function setStatus(id,msg,err){var el=$(id);el.textContent=msg;el.className="status"+(err?" err":"")}
+
+function runLocal(v,quiet){
+  var r=localBuild(v);
+  state.result=r;state.lastForm=v;
+  render(r,v,"словарь");
+  paintPending();
+  if(!quiet) show("tab-out");
+}
+
+$("btn-build").addEventListener("click",function(){
+  var v=readForm();
+  if(!v.look&&!v.wear&&!v.pose){setStatus("st-build","Заполните хотя бы внешность, одежду или позу.",true);return}
+  if(v.mode==="local"){ setStatus("st-build",""); runLocal(v); return; }
+  var btn=$("btn-build");btn.disabled=true;setStatus("st-build","Отправляю запрос…");
+  claudePromise.then(function(sample){
+    if(!sample) throw new Error("Claude недоступен в этом просмотре");
+    return sample.json(buildInstruction(v),{modelTier:"default"});
+  }).then(function(d){
+    if(!d||!d.appearance) throw new Error("Пустой ответ");
+    state.pending=[];paintPending();
+    var r={appearance:d.appearance,clothing:d.clothing,action:d.action,negative:NEG,portrait:d.portrait,notes:d.notes||""};
+    state.result=r;state.lastForm=v;render(r,v,"Claude");
+    btn.disabled=false;setStatus("st-build","");show("tab-out");
+  }).catch(function(e){
+    btn.disabled=false;
+    runLocal(v);
+    setStatus("st-build",(e&&e.message?e.message:"Ошибка")+" — собрал по словарю.",true);
+  });
+});
+
+/* ---------- вывод ---------- */
+var OUT=[["o-app","c-app","appearance"],["o-clo","c-clo","clothing"],["o-act","c-act","action"],["o-neg","c-neg","negative"],["o-por","c-por","portrait"]];
+OUT.forEach(function(o){
+  $(o[0]).addEventListener("input",function(){
+    count(o[1],$(o[0]).value);
+    autosize($(o[0]));
+    if(state.result) state.result[o[2]]=$(o[0]).value;
+    setStatus("st-save","Есть несохранённые правки.");
+  });
+});
+function autosize(el){el.style.height="auto";el.style.height=(el.scrollHeight+2)+"px"}
+function autosizeAll(){OUT.forEach(function(o){autosize($(o[0]))})}
+
+function render(r,v,via){
+  $("o-app").value=r.appearance||"";
+  $("o-clo").value=r.clothing||"";
+  $("o-act").value=r.action||"";
+  $("o-neg").value=r.negative||NEG;
+  $("o-por").value=r.portrait||"";
+  OUT.forEach(function(o){count(o[1],$(o[0]).value)});
+  setTimeout(autosizeAll,0);
+  var meta=(v.name?v.name+" · ":"")+(v.style==="dark"?"Dark":"Casual")+" · "+via;
+  $("out-meta").textContent=meta+(r.notes?" — "+r.notes:"");
+  setStatus("st-save","");
+}
+function count(id,s){var n=(s||"").length;var el=$(id);el.textContent=n+" / 500";el.className="cnt"+(n>500?" over":"")}
+
+document.querySelectorAll("[data-copy]").forEach(function(b){
+  b.addEventListener("click",function(){
+    var key=b.dataset.copy,text;
+    if(key==="ALL"){
+      text="APPEARANCE\n"+$("o-app").value+"\n\nCLOTHING & ACCESSORIES\n"+$("o-clo").value+
+        "\n\nACTION & BACKGROUND\n"+$("o-act").value+"\n\nNEGATIVE PROMPT\n"+$("o-neg").value+
+        "\n\nPORTRAIT\n"+$("o-por").value;
+    } else { text=$(key).value; }
+    if(!text)return;
+    var old=b.textContent;
+    var done=function(){b.textContent="Готово";setTimeout(function(){b.textContent=old},1500)};
+    try{navigator.clipboard.writeText(text).then(done,function(){selArea(key)})}catch(e){selArea(key)}
+  });
+});
+function selArea(key){if(key==="ALL")return;var el=$(key);if(!el)return;el.focus();el.select()}
+
+/* ---------- экран непонятых фраз ---------- */
+$("btn-to-dict").addEventListener("click",function(){show("tab-dict")});
+
+function paintPending(){
+  var p=state.pending||[];
+  $("unknown-flag").hidden = p.length===0;
+  $("unknown-count").textContent = p.length? ("Фраз без перевода: "+p.length+". Они попали в промпт как есть.") : "";
+  $("pending-wrap").hidden = p.length===0;
+  var box=$("pending-list");box.innerHTML="";
+  p.forEach(function(u,i){
+    var d=document.createElement("div");d.className="term";
+    var w=document.createElement("span");w.className="where";w.textContent=FIELD_NAMES[u.field]||u.field;
+    var s=document.createElement("span");s.className="src";s.textContent=u.phrase;
+    var c=document.createElement("span");c.className="ctx";
+    if(u.context && u.context!==u.phrase){
+      var idx=u.context.toLowerCase().indexOf(u.phrase.toLowerCase());
+      if(idx>=0){
+        c.appendChild(document.createTextNode("в строке: "+u.context.slice(0,idx)));
+        var em=document.createElement("em");em.textContent=u.context.substr(idx,u.phrase.length);
+        c.appendChild(em);
+        c.appendChild(document.createTextNode(u.context.slice(idx+u.phrase.length)));
+      } else { c.textContent="в строке: "+u.context; }
+    } else { c.textContent="отдельная фраза"; }
+    var inp=document.createElement("input");inp.type="text";inp.placeholder="english phrase";
+    inp.setAttribute("data-ru",u.norm);inp.id="pend-"+i;inp.autocomplete="off";
+    d.appendChild(w);d.appendChild(s);d.appendChild(c);d.appendChild(inp);
+    box.appendChild(d);
+  });
+  updateDot();
+}
+function updateDot(){
+  var n=(state.pending||[]).length;
+  $("dict-dot").hidden = n===0;
+  $("dict-dot").textContent = n;
+}
+
+$("btn-learn").addEventListener("click",function(){
+  var u=userDict(),added=0;
+  $("pending-list").querySelectorAll("input[data-ru]").forEach(function(inp){
+    var en=inp.value.trim();
+    if(en){u[inp.getAttribute("data-ru")]=en;added++}
+  });
+  if(!added){setStatus("st-learn","Ничего не заполнено.",true);return}
+  userDictPut(u);dictChanged();
+  setStatus("st-learn","Запомнено: "+added+". Пересобираю.");
+  var v=state.lastForm||readForm();
+  runLocal(v);
+  setTimeout(function(){show("tab-out")},250);
+});
+$("btn-skip").addEventListener("click",function(){
+  state.pending=[];paintPending();setStatus("st-learn","");show("tab-out");
+});
+
+/* ---------- мои термины ---------- */
+$("btn-add").addEventListener("click",function(){
+  var ru=normalize($("add-ru").value), en=$("add-en").value.trim();
+  if(!ru||!en)return;
+  var u=userDict();u[ru]=en;userDictPut(u);dictChanged();
+  $("add-ru").value="";$("add-en").value="";
+});
+function paintDict(){
+  var u=userDict(),keys=Object.keys(u).sort();
+  var ul=$("dict-list");ul.innerHTML="";
+  $("dict-empty").hidden = keys.length>0;
+  keys.forEach(function(k){
+    var li=document.createElement("li");
+    var nm=document.createElement("span");nm.className="nm";nm.textContent=k+" → "+u[k];
+    var ed=document.createElement("button");ed.className="btn ghost small";ed.textContent="В поля";
+    ed.addEventListener("click",function(){$("add-ru").value=k;$("add-en").value=u[k]});
+    var dl=document.createElement("button");dl.className="btn ghost small";dl.textContent="Удалить";
+    dl.addEventListener("click",function(){var x=userDict();delete x[k];userDictPut(x);dictChanged()});
+    li.appendChild(nm);li.appendChild(ed);li.appendChild(dl);
+    ul.appendChild(li);
+  });
+  $("base-count").textContent = Object.keys(DICT).length;
+}
+$("btn-export").addEventListener("click",function(){
+  var u=userDict(),lines=Object.keys(u).sort().map(function(k){return k+" = "+u[k]});
+  var ta=$("dict-export");
+  ta.hidden=false;ta.value=lines.join("\n")||"(пусто)";autosize(ta);ta.focus();ta.select();
+});
+$("btn-clear").addEventListener("click",function(){
+  var ta=$("dict-export");
+  if(ta.dataset.armed==="1"){
+    userDictPut({});dictChanged();ta.dataset.armed="";
+    $("btn-clear").textContent="Очистить мои термины";
+  } else {
+    ta.dataset.armed="1";
+    $("btn-clear").textContent="Точно очистить? Нажмите ещё раз";
+    setTimeout(function(){ta.dataset.armed="";$("btn-clear").textContent="Очистить мои термины"},4000);
+  }
+});
+
+/* ---------- архив ---------- */
+function listGet(){try{return JSON.parse(localStorage.getItem("forge-chars")||"[]")}catch(e){return []}}
+function listPut(a){try{localStorage.setItem("forge-chars",JSON.stringify(a))}catch(e){}}
+
+$("btn-save").addEventListener("click",function(){
+  if(!state.result){setStatus("st-save","Сначала соберите промпты.",true);return}
+  var v=readForm();
+  var res={appearance:$("o-app").value,clothing:$("o-clo").value,action:$("o-act").value,
+           negative:$("o-neg").value,portrait:$("o-por").value,notes:state.result.notes||""};
+  state.result=res;
+  var rec={id:state.editingId||("c"+Date.now()),name:v.name||"Без имени",style:v.style,form:v,result:res,saved:new Date().toISOString()};
+  state.editingId=rec.id;
+  var a=listGet().filter(function(x){return x.id!==rec.id});
+  a.unshift(rec);listPut(a);paintList();
+  setStatus("st-save","Сохранено на устройстве.");
+});
+
+function paintList(){
+  var a=listGet().sort(function(x,y){return (y.saved||"").localeCompare(x.saved||"")});
+  var ul=$("char-list");ul.innerHTML="";
+  $("list-empty").hidden=a.length>0;
+  a.forEach(function(rec){
+    var li=document.createElement("li");
+    var nm=document.createElement("span");nm.className="nm";nm.textContent=rec.name;
+    var chip=document.createElement("span");chip.className="chip";chip.textContent=rec.style==="dark"?"Dark":"Casual";
+    var op=document.createElement("button");op.className="btn ghost small";op.textContent="Открыть";
+    op.addEventListener("click",function(){openRec(rec)});
+    var dl=document.createElement("button");dl.className="btn ghost small";dl.textContent="Удалить";
+    dl.addEventListener("click",function(){listPut(listGet().filter(function(x){return x.id!==rec.id}));paintList()});
+    li.appendChild(nm);li.appendChild(chip);li.appendChild(op);li.appendChild(dl);
+    ul.appendChild(li);
+  });
+}
+function openRec(rec){
+  var f=rec.form||{};
+  $("f-name").value=f.name||rec.name||"";$("f-style").value=f.style||"dark";
+  $("f-sex").value=f.sex||"woman";$("f-mode").value=f.mode||"local";
+  $("f-look").value=f.look||"";$("f-mood").value=f.mood||"";$("f-wear").value=f.wear||"";
+  $("f-pose").value=f.pose||"";$("f-scene").value=f.scene||"";
+  styleNote();modeNote();saveDraft();
+  state.result=rec.result;state.editingId=rec.id;state.pending=[];state.lastForm=f;
+  paintPending();render(rec.result||{},f,"сохранённое");show("tab-out");
+}
+
+paintDict();paintList();paintPending();
+window.addEventListener("resize",function(){if(!$("screen-out").hidden)autosizeAll()});
+</script>
+
+<script>
+if("serviceWorker" in navigator){
+  window.addEventListener("load", function(){
+    navigator.serviceWorker.register("sw.js").catch(function(){});
+  });
+}
+</script>
+
+</body>
+</html>
