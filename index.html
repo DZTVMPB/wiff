@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#2b3dae">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#f0f1ed">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#121316">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -20,7 +21,7 @@ img{max-width:100%}
 <title>Штриховая мастерская</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: phone-first single column, four screens swapped in place, build control pinned under the form */
+/* Layout: phone-first single column, five screens swapped in place, toast pinned to the bottom */
 :root{
   --paper:#f0f1ed;--card:#ffffff;--ink:#16181a;--soft:#5a6066;--rule:#d6d9d1;
   --accent:#2b3dae;--accent-soft:#e4e7fa;--warn:#9a3412;--warn-soft:#fbeae1;--ok:#1f6f45;
@@ -46,52 +47,66 @@ html,body{height:100%}
 body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;margin:0;display:flex;flex-direction:column}
 .topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--paper);border-bottom:1px solid var(--rule);padding:12px 14px 0;display:flex;flex-direction:column;gap:9px}
 .brand{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
-.brand h1{font-family:var(--display);font-weight:400;font-size:25px;margin:0;line-height:1}
+.brand h1{font-family:var(--display);font-weight:400;font-size:24px;margin:0;line-height:1}
 .brand span{font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:var(--soft)}
-nav{display:flex;gap:1px}
-nav button{flex:1;background:none;border:none;border-bottom:2px solid transparent;font-family:var(--body);font-size:12.5px;font-weight:600;color:var(--soft);padding:9px 2px;cursor:pointer;position:relative}
+nav{display:flex;gap:0}
+nav button{flex:1;background:none;border:none;border-bottom:2px solid transparent;font-family:var(--body);font-size:12px;font-weight:600;color:var(--soft);padding:9px 1px;cursor:pointer;transition:color .18s ease,border-color .18s ease}
 nav button[aria-selected="true"]{color:var(--accent);border-bottom-color:var(--accent)}
 nav button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
-nav .dot{display:inline-block;min-width:16px;padding:0 4px;margin-left:4px;background:var(--warn);color:var(--paper);border-radius:8px;font-size:10px;line-height:16px;vertical-align:1px}
-main{flex:1;overflow-y:auto;padding:16px 14px 32px;min-width:0}
+nav .dot{display:inline-block;min-width:15px;padding:0 3px;margin-left:3px;background:var(--warn);color:var(--paper);border-radius:8px;font-size:10px;line-height:15px;vertical-align:1px}
+main{flex:1;overflow-y:auto;padding:16px 14px 40px;min-width:0}
 .screen{display:flex;flex-direction:column;gap:16px;min-width:0}
+.screen.enter{animation:slideIn .22s ease both}
+@keyframes slideIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
 .field{display:flex;flex-direction:column;gap:5px;min-width:0}
 label{font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;font-weight:700;color:var(--soft)}
 .hint{font-size:12.5px;color:var(--soft);margin:0}
-input[type=text],textarea,select{font-family:var(--body);font-size:16px;color:var(--ink);background:var(--card);border:1px solid var(--rule);border-radius:4px;padding:10px 12px;width:100%;min-width:0}
+input[type=text],textarea,select{font-family:var(--body);font-size:16px;color:var(--ink);background:var(--card);border:1px solid var(--rule);border-radius:4px;padding:10px 12px;width:100%;min-width:0;transition:border-color .15s ease}
 textarea{resize:vertical;min-height:74px;line-height:1.5}
 input:focus,textarea:focus,select:focus{outline:2px solid var(--accent);outline-offset:-1px;border-color:var(--accent)}
 .row{display:flex;gap:9px;min-width:0;flex-wrap:wrap}
 .row>*{flex:1 1 150px;min-width:0}
-.btn{font-family:var(--body);font-size:15px;font-weight:600;background:var(--accent);color:var(--on-accent);border:none;border-radius:4px;padding:13px 16px;cursor:pointer;width:100%}
+.btn{font-family:var(--body);font-size:15px;font-weight:600;background:var(--accent);color:var(--on-accent);border:none;border-radius:4px;padding:13px 16px;cursor:pointer;width:100%;transition:transform .1s ease,opacity .15s ease}
+.btn:active{transform:scale(.985)}
 .btn:disabled{opacity:.5;cursor:default}
 .btn.ghost{background:none;color:var(--accent);border:1px solid var(--rule)}
+.btn.danger{background:none;color:var(--warn);border:1px solid var(--rule)}
 .btn.small{font-size:12px;padding:7px 11px;width:auto;flex:0 0 auto}
 .btn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 .buildbox{display:flex;flex-direction:column;gap:8px;background:var(--card);border:1px solid var(--rule);border-radius:5px;padding:12px}
 .status{font-size:13px;color:var(--soft);min-height:19px}
 .status.err{color:var(--warn)}
-.flag{background:var(--warn-soft);border-left:2px solid var(--warn);padding:11px 13px;font-size:13.5px;border-radius:0 4px 4px 0;display:flex;flex-direction:column;gap:9px}
+.flag{background:var(--warn-soft);border-left:2px solid var(--warn);padding:11px 13px;font-size:13.5px;border-radius:0 4px 4px 0;display:flex;flex-direction:column;gap:9px;animation:slideIn .22s ease both}
 .flag b{font-size:11px;letter-spacing:.07em;text-transform:uppercase}
 .out{display:flex;flex-direction:column;gap:6px;min-width:0;margin-bottom:16px}
 .outhead{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
 .outhead h3{margin:0;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--soft);font-weight:700;flex:1 1 auto}
-.cnt{font-family:var(--mono);font-size:11px;color:var(--ok);font-variant-numeric:tabular-nums}
+.cnt{font-family:var(--mono);font-size:11px;color:var(--ok);font-variant-numeric:tabular-nums;transition:color .2s ease}
 .cnt.over{color:var(--warn);font-weight:600}
 textarea.slab{background:var(--card);border:1px solid var(--rule);border-left:2px solid var(--accent);border-radius:0 4px 4px 0;font-family:var(--mono);font-size:12.5px;line-height:1.6;padding:11px 13px;min-height:60px;overflow:hidden;resize:none}
+textarea.slab.flash{animation:flash .5s ease}
+@keyframes flash{0%{background:var(--accent-soft)}100%{background:var(--card)}}
 ul.list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
-ul.list li{background:var(--card);border:1px solid var(--rule);border-radius:4px;padding:11px 13px;display:flex;align-items:center;gap:9px;flex-wrap:wrap;min-width:0}
+ul.list li{background:var(--card);border:1px solid var(--rule);border-radius:4px;padding:11px 13px;display:flex;align-items:center;gap:9px;flex-wrap:wrap;min-width:0;animation:slideIn .2s ease both}
+ul.list li.going{animation:fadeOut .2s ease both}
+@keyframes fadeOut{to{opacity:0;transform:translateX(-10px)}}
 ul.list .nm{flex:1 1 120px;min-width:0;font-weight:600;overflow-wrap:anywhere}
+ul.list .nm small{display:block;font-weight:400;color:var(--soft);font-family:var(--mono);font-size:11.5px}
 .empty{border:1px dashed var(--rule);border-radius:4px;padding:22px 16px;text-align:center;color:var(--soft);font-size:14px}
 .chip{display:inline-block;font-size:10px;letter-spacing:.07em;text-transform:uppercase;background:var(--accent-soft);color:var(--accent);padding:3px 7px;border-radius:3px;font-weight:700}
 hr.divider{height:1px;background:var(--rule);border:0;margin:0}
 .note{font-size:12.5px;color:var(--soft);margin:0}
-.term{background:var(--card);border:1px solid var(--rule);border-radius:4px;padding:12px 13px;display:flex;flex-direction:column;gap:8px;min-width:0}
-.term .src{font-weight:600;overflow-wrap:anywhere}
+.term{background:var(--card);border:1px solid var(--rule);border-radius:4px;padding:12px 13px;display:flex;flex-direction:column;gap:7px;min-width:0;animation:slideIn .2s ease both}
 .term .ctx{font-size:12.5px;color:var(--soft);overflow-wrap:anywhere}
 .term .ctx em{font-style:normal;background:var(--warn-soft);color:var(--ink);padding:0 3px;border-radius:2px}
 .term .where{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--accent);font-weight:700}
-h2.sec{font-family:var(--display);font-weight:400;font-size:24px;margin:0;line-height:1.1}
+.term label{font-size:10.5px}
+h2.sec{font-family:var(--display);font-weight:400;font-size:23px;margin:0;line-height:1.1}
+#toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translate(-50%,16px);z-index:30;background:var(--ink);color:var(--paper);padding:11px 18px;border-radius:22px;font-size:14px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .2s ease,transform .2s ease;max-width:calc(100vw - 32px);text-align:center}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
 </style>
 
 </head>
@@ -99,16 +114,17 @@ h2.sec{font-family:var(--display);font-weight:400;font-size:24px;margin:0;line-h
 <div class="topbar">
   <div class="brand"><h1>Штриховая мастерская</h1><span id="badge">офлайн</span></div>
   <nav role="tablist">
-    <button role="tab" id="tab-edit" aria-selected="true">Персонаж</button>
-    <button role="tab" id="tab-out" aria-selected="false">Промпты</button>
+    <button role="tab" id="tab-edit" aria-selected="true">Герой</button>
+    <button role="tab" id="tab-out" aria-selected="false">Промпт</button>
     <button role="tab" id="tab-dict" aria-selected="false">Словарь<span class="dot" id="dict-dot" hidden></span></button>
+    <button role="tab" id="tab-style" aria-selected="false">Стили</button>
     <button role="tab" id="tab-list" aria-selected="false">Архив</button>
   </nav>
 </div>
 
 <main>
 
-<!-- ПЕРСОНАЖ -->
+<!-- ГЕРОЙ -->
 <div class="screen" id="screen-edit">
   <div class="field">
     <label for="f-name">Имя персонажа</label>
@@ -118,10 +134,7 @@ h2.sec{font-family:var(--display);font-weight:400;font-size:24px;margin:0;line-h
   <div class="row">
     <div class="field">
       <label for="f-style">Стиль рисовки</label>
-      <select id="f-style">
-        <option value="dark">Dark — тяжёлый штрих</option>
-        <option value="casual">Casual — светлый, цветной</option>
-      </select>
+      <select id="f-style"></select>
     </div>
     <div class="field">
       <label for="f-sex">Персонаж</label>
@@ -168,11 +181,12 @@ h2.sec{font-family:var(--display);font-weight:400;font-size:24px;margin:0;line-h
     </div>
     <p class="hint" id="mode-note"></p>
     <button class="btn" id="btn-build">Создать</button>
+    <button class="btn danger" id="btn-clear">Очистить поля</button>
     <div class="status" id="st-build"></div>
   </div>
 </div>
 
-<!-- ПРОМПТЫ -->
+<!-- ПРОМПТ -->
 <div class="screen" id="screen-out" hidden>
   <p class="note" id="out-meta"></p>
 
@@ -218,7 +232,7 @@ h2.sec{font-family:var(--display);font-weight:400;font-size:24px;margin:0;line-h
 
   <div id="pending-wrap" hidden>
     <h2 class="sec">Непонятые фразы</h2>
-    <p class="hint">Напишите английский вариант. Он сохранится и дальше будет подставляться сам.</p>
+    <p class="hint">Русскую часть можно поправить — если словарь выхватил обрывок, напишите фразу целиком. Английский вариант сохранится и дальше будет подставляться сам.</p>
     <div id="pending-list" style="display:flex;flex-direction:column;gap:10px;margin-top:12px"></div>
     <div class="row" style="margin-top:12px">
       <button class="btn" id="btn-learn">Запомнить и пересобрать</button>
@@ -229,7 +243,7 @@ h2.sec{font-family:var(--display);font-weight:400;font-size:24px;margin:0;line-h
   </div>
 
   <h2 class="sec">Мои термины</h2>
-  <p class="hint">Всё, что вы добавили. Эти записи имеют приоритет над встроенным словарём.</p>
+  <p class="hint">Эти записи имеют приоритет над встроенным словарём.</p>
 
   <div class="row">
     <input type="text" id="add-ru" placeholder="русская фраза" autocomplete="off">
@@ -243,10 +257,75 @@ h2.sec{font-family:var(--display);font-weight:400;font-size:24px;margin:0;line-h
   <hr class="divider">
   <div class="row">
     <button class="btn ghost small" id="btn-export">Показать для копирования</button>
-    <button class="btn ghost small" id="btn-clear">Очистить мои термины</button>
+    <button class="btn danger small" id="btn-dclear">Очистить мои термины</button>
   </div>
   <textarea class="slab" id="dict-export" hidden spellcheck="false"></textarea>
   <p class="note">Встроенных терминов: <span id="base-count"></span>.</p>
+</div>
+
+<!-- СТИЛИ -->
+<div class="screen" id="screen-style" hidden>
+  <h2 class="sec">Стили рисовки</h2>
+  <p class="hint">Dark и Casual встроены и не меняются. Скопируйте любой из них и правьте копию как угодно.</p>
+
+  <ul class="list" id="style-list"></ul>
+
+  <div class="row">
+    <button class="btn ghost" id="btn-new-dark">Копия Dark</button>
+    <button class="btn ghost" id="btn-new-casual">Копия Casual</button>
+  </div>
+
+  <div id="style-editor" hidden>
+    <hr class="divider" style="margin:4px 0 16px">
+    <h2 class="sec" id="editor-title">Правка стиля</h2>
+
+    <div class="field" style="margin-top:12px">
+      <label for="s-name">Название</label>
+      <input type="text" id="s-name" autocomplete="off">
+    </div>
+    <div class="field">
+      <label for="s-note">Подпись под выбором</label>
+      <input type="text" id="s-note" autocomplete="off" placeholder="чем этот стиль хорош">
+    </div>
+
+    <div class="field">
+      <label for="s-app">Зачин Appearance</label>
+      <p class="hint">Подставляется в начало блока внешности. Слова «one figure alone» заменятся на мужчину или женщину.</p>
+      <textarea id="s-app"></textarea>
+    </div>
+    <div class="field">
+      <label for="s-clo">Зачин Clothing</label>
+      <textarea id="s-clo"></textarea>
+    </div>
+    <div class="field">
+      <label for="s-wear">Хвост Clothing</label>
+      <p class="hint">Добавляется в конец блока одежды. Например: no shine</p>
+      <input type="text" id="s-wear" autocomplete="off">
+    </div>
+    <div class="field">
+      <label for="s-act">Зачин Action</label>
+      <textarea id="s-act"></textarea>
+    </div>
+    <div class="field">
+      <label for="s-end">Хвост Action</label>
+      <p class="hint">Добавляется в конец блока сцены. Здесь же держите запрет на рамку и текст.</p>
+      <textarea id="s-end"></textarea>
+    </div>
+    <div class="field">
+      <label for="s-por">Зачин Портрета</label>
+      <textarea id="s-por"></textarea>
+    </div>
+    <div class="field">
+      <label for="s-neg">Негатив</label>
+      <input type="text" id="s-neg" autocomplete="off">
+    </div>
+
+    <div class="row" style="margin-top:12px">
+      <button class="btn" id="btn-style-save">Сохранить стиль</button>
+      <button class="btn ghost" id="btn-style-close">Закрыть</button>
+    </div>
+    <div class="status" id="st-style"></div>
+  </div>
 </div>
 
 <!-- АРХИВ -->
@@ -256,6 +335,8 @@ h2.sec{font-family:var(--display);font-weight:400;font-size:24px;margin:0;line-h
 </div>
 
 </main>
+
+<div id="toast" role="status" aria-live="polite"></div>
 
 <script>
 /* Русско-английский словарь терминов для промптов. Длинные фразы ищутся раньше коротких. */
@@ -414,29 +495,116 @@ var DICT = {
 };
 
 
-var TAILS = {
+var BUILTIN = {
   dark:{
+    id:"dark",name:"Dark — тяжёлый штрих",builtin:true,
+    note:"Плотный чёрный, глубокая штриховка, приглушённый цвет. Драма, фэнтези, ночь.",
     app:"ink on paper, pen and ink drawing, (heavy cross-hatching:1.4), (bold black ink outline:1.3), flat matte colour, no rendering, solo, one figure alone, full body head to toe, realistic adult proportions, detailed adult face",
     clo:"pen and ink, heavy cross-hatching, hatched fabric folds, flat matte colour, one outfit",
+    wear:"no shine",
     act:"pen and ink drawing, heavy cross-hatching, visible linework, flat matte tones",
     end:"fully inked background, lighter hatching behind the figure, no border, no frame, no text",
     por:"ink on paper, pen and ink drawing, heavy cross-hatching, bold black ink outline, flat matte colour",
-    tailWear:"no shine"
+    neg:"blurry, low quality, deformed hands, extra fingers"
   },
   casual:{
+    id:"casual",name:"Casual — светлый, цветной",builtin:true,
+    note:"Открытый штрих, много воздуха, насыщенный цвет. Современность, комедия, романтика.",
     app:"ink and flat colour illustration, clean bold black ink outline, variable line weight, light open cross-hatching, bright warm palette, solo, one figure alone, full body head to toe, realistic adult proportions, detailed face",
     clo:"clean bold black ink outline, light open cross-hatching, bright saturated flat colours, one outfit",
+    wear:"no logos, no prints",
     act:"clean bold black ink outline, light open cross-hatching, bright saturated flat colours, sunny light",
     end:"light airy background, minimal shadow, no border, no frame, no text",
     por:"ink and flat colour illustration, clean bold black ink outline, light open cross-hatching, bright warm palette",
-    tailWear:"no logos, no prints"
+    neg:"blurry, low quality, deformed hands, extra fingers"
   }
 };
-var NEG = "blurry, low quality, deformed hands, extra fingers";
 var FIELD_NAMES = {look:"Внешность",mood:"Выражение",wear:"Одежда",pose:"Поза",scene:"Место"};
 
 var $=function(id){return document.getElementById(id)};
-var state={result:null,editingId:null,pending:[],lastForm:null};
+var state={result:null,editingId:null,pending:[],lastForm:null,styleEdit:null};
+
+/* ---------- тосты ---------- */
+var toastTimer=null;
+function toast(msg){
+  var t=$("toast");
+  t.textContent=msg;t.classList.add("on");
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(function(){t.classList.remove("on")},2200);
+}
+
+/* ---------- стили ---------- */
+function userStyles(){try{return JSON.parse(localStorage.getItem("forge-styles")||"{}")}catch(e){return {}}}
+function userStylesPut(o){try{localStorage.setItem("forge-styles",JSON.stringify(o))}catch(e){}}
+function allStyles(){
+  var out=[BUILTIN.dark,BUILTIN.casual],u=userStyles(),k;
+  for(k in u) out.push(u[k]);
+  return out;
+}
+function getStyle(id){
+  if(BUILTIN[id]) return BUILTIN[id];
+  var u=userStyles();
+  return u[id] || BUILTIN.dark;
+}
+function fillStyleSelect(){
+  var sel=$("f-style"),cur=sel.value;
+  sel.innerHTML="";
+  allStyles().forEach(function(s){
+    var o=document.createElement("option");o.value=s.id;o.textContent=s.name;sel.appendChild(o);
+  });
+  if(cur && allStyles().some(function(s){return s.id===cur})) sel.value=cur;
+  styleNote();
+}
+function styleNote(){
+  var s=getStyle($("f-style").value);
+  $("style-note").textContent = s.note || "";
+}
+
+/* ---------- вкладки ---------- */
+var tabs=[["tab-edit","screen-edit"],["tab-out","screen-out"],["tab-dict","screen-dict"],["tab-style","screen-style"],["tab-list","screen-list"]];
+tabs.forEach(function(t){$(t[0]).addEventListener("click",function(){show(t[0])})});
+function show(id){
+  tabs.forEach(function(t){
+    var on=t[0]===id, el=$(t[1]);
+    $(t[0]).setAttribute("aria-selected",on?"true":"false");
+    el.hidden=!on;
+    if(on){el.classList.remove("enter");void el.offsetWidth;el.classList.add("enter")}
+  });
+  document.querySelector("main").scrollTop=0;
+  if(id==="tab-out") setTimeout(autosizeAll,30);
+}
+
+function modeNote(){
+  $("mode-note").textContent = $("f-mode").value==="local"
+    ? "Переводит по словарю. Без интернета и без аккаунта. Непонятые фразы предложит перевести и запомнит."
+    : "Переводит и переписывает в язык промптов. Нужен интернет, вход в Claude и доступ к сервису; тратит ваш лимит.";
+}
+$("f-style").addEventListener("change",function(){styleNote();saveDraft()});
+$("f-mode").addEventListener("change",function(){modeNote();saveDraft()});
+
+/* ---------- черновик ---------- */
+var FIELDS=["f-name","f-style","f-sex","f-mode","f-look","f-mood","f-wear","f-pose","f-scene"];
+var TEXTFIELDS=["f-name","f-look","f-mood","f-wear","f-pose","f-scene"];
+function saveDraft(){try{var d={};FIELDS.forEach(function(k){d[k]=$(k).value});localStorage.setItem("forge-draft",JSON.stringify(d))}catch(e){}}
+function loadDraft(){try{var d=JSON.parse(localStorage.getItem("forge-draft")||"{}");FIELDS.forEach(function(k){if(d[k]!=null)$(k).value=d[k]})}catch(e){}}
+FIELDS.forEach(function(k){$(k).addEventListener("input",saveDraft)});
+
+/* очистка полей */
+var clearArmed=false,clearTimer=null;
+$("btn-clear").addEventListener("click",function(){
+  var b=$("btn-clear");
+  if(!clearArmed){
+    clearArmed=true;b.textContent="Точно очистить? Нажмите ещё раз";
+    clearTimer=setTimeout(function(){clearArmed=false;b.textContent="Очистить поля"},4000);
+    return;
+  }
+  clearTimeout(clearTimer);clearArmed=false;b.textContent="Очистить поля";
+  TEXTFIELDS.forEach(function(k){$(k).value=""});
+  state.result=null;state.editingId=null;state.pending=[];
+  paintPending();saveDraft();
+  setStatus("st-build","");
+  toast("Поля очищены");
+});
 
 /* ---------- пользовательский словарь ---------- */
 function userDict(){try{return JSON.parse(localStorage.getItem("forge-userdict")||"{}")}catch(e){return {}}}
@@ -450,44 +618,10 @@ function allKeys(){
   KEYS_CACHE={map:m,keys:Object.keys(m).sort(function(a,b){return b.length-a.length})};
   return KEYS_CACHE;
 }
-function dictChanged(){KEYS_CACHE=null;paintDict();updateDot()}
-
-/* ---------- вкладки ---------- */
-var tabs=[["tab-edit","screen-edit"],["tab-out","screen-out"],["tab-dict","screen-dict"],["tab-list","screen-list"]];
-tabs.forEach(function(t){$(t[0]).addEventListener("click",function(){show(t[0])})});
-function show(id){
-  tabs.forEach(function(t){
-    var on=t[0]===id;
-    $(t[0]).setAttribute("aria-selected",on?"true":"false");
-    $(t[1]).hidden=!on;
-  });
-  document.querySelector("main").scrollTop=0;
-  if(id==="tab-out") setTimeout(autosizeAll,0);
-}
-
-function styleNote(){
-  $("style-note").textContent = $("f-style").value==="dark"
-    ? "Плотный чёрный, глубокая штриховка, приглушённый цвет. Драма, фэнтези, ночь."
-    : "Открытый штрих, много воздуха, насыщенный цвет. Современность, комедия, романтика.";
-}
-function modeNote(){
-  $("mode-note").textContent = $("f-mode").value==="local"
-    ? "Переводит по словарю. Без интернета и без аккаунта. Непонятые фразы предложит перевести и запомнит."
-    : "Переводит и переписывает в язык промптов. Нужен интернет, вход в Claude и доступ к сервису; тратит ваш лимит.";
-}
-$("f-style").addEventListener("change",styleNote);
-$("f-mode").addEventListener("change",function(){modeNote();saveDraft()});
-styleNote();modeNote();
-
-/* ---------- черновик ---------- */
-var FIELDS=["f-name","f-style","f-sex","f-mode","f-look","f-mood","f-wear","f-pose","f-scene"];
-function saveDraft(){try{var d={};FIELDS.forEach(function(k){d[k]=$(k).value});localStorage.setItem("forge-draft",JSON.stringify(d))}catch(e){}}
-function loadDraft(){try{var d=JSON.parse(localStorage.getItem("forge-draft")||"{}");FIELDS.forEach(function(k){if(d[k]!=null)$(k).value=d[k]});styleNote();modeNote()}catch(e){}}
-FIELDS.forEach(function(k){$(k).addEventListener("input",saveDraft);$(k).addEventListener("change",saveDraft)});
-loadDraft();
+function dictChanged(){KEYS_CACHE=null;paintDict()}
 
 /* ---------- перевод ---------- */
-function normalize(s){return s.toLowerCase().replace(/\s+/g," ").trim().replace(/[.,;!?]+$/,"")}
+function normalize(s){return String(s||"").toLowerCase().replace(/\s+/g," ").trim().replace(/[.,;!?]+$/,"")}
 var COLOR_RE=/^(black|white|grey|charcoal grey|red|deep burgundy|pink|warm orange|mustard yellow|gold|green|olive green|pale blue|deep blue|navy blue|teal|violet|brown|cream|rust orange|silver)\s+(a|an)\s+/;
 function tidyArticle(s){var m=s.match(COLOR_RE);return m? m[2]+" "+m[1]+" "+s.slice(m[0].length) : s}
 
@@ -523,7 +657,7 @@ function join(parts){return parts.filter(function(s){return s&&String(s).trim()}
 function clip(s){if(s.length<=500)return s;var cut=s.lastIndexOf(", ",497);return cut>100? s.slice(0,cut) : s.slice(0,497)}
 
 function localBuild(v){
-  var t=TAILS[v.style];
+  var t=getStyle(v.style);
   var who=v.sex==="man"?"one man alone":"one woman alone";
   var unknown=[];
   var look=translateField(v.look,"look",unknown);
@@ -536,10 +670,10 @@ function localBuild(v){
     if(!u.norm||seen[u.norm])return false;seen[u.norm]=true;return true;
   });
   return {
-    appearance: clip(join([t.app.replace("one figure alone",who)].concat(look).concat(mood))),
-    clothing:   clip(join([t.clo].concat(wear).concat([t.tailWear]))),
+    appearance: clip(join([String(t.app||"").replace("one figure alone",who)].concat(look).concat(mood))),
+    clothing:   clip(join([t.clo].concat(wear).concat([t.wear]))),
     action:     clip(join([t.act].concat(pose).concat(scene).concat([t.end]))),
-    negative:   NEG,
+    negative:   t.neg || "blurry, low quality, deformed hands, extra fingers",
     portrait:   clip(join([t.por,"upper body portrait","close framing","entire head visible","detailed face"].concat(mood).concat(look.slice(0,6)).concat(["blurred background"]).concat(scene.slice(0,2))))
   };
 }
@@ -551,7 +685,7 @@ var claudePromise = (window.claude && window.claude.use)
 claudePromise.then(function(s){ if(s) $("badge").textContent="claude доступен"; });
 
 function buildInstruction(v){
-  var t=TAILS[v.style];
+  var t=getStyle(v.style);
   var who=v.sex==="man"?"one man alone":"one woman alone";
   return [
 "You write prompts for an AI image generator, for a character card. Output JSON only.",
@@ -559,19 +693,20 @@ function buildInstruction(v){
 "HARD RULES:",
 "1. Every block is 500 characters or fewer. Strict platform limit.",
 "2. Each block begins with its opener, copied verbatim:",
-"   appearance: "+t.app.replace("one figure alone",who),
+"   appearance: "+String(t.app||"").replace("one figure alone",who),
 "   clothing: "+t.clo,
 "   action: "+t.act,
 "   portrait: "+t.por,
 "3. The action block ends with exactly: "+t.end,
-"4. Comma-separated lowercase phrases. No sentences, no line breaks, no full stops.",
-"5. Adult proportions stated explicitly. Never any wording implying a child.",
-"6. Name the colour of the single most important garment twice.",
-"7. Order inside a block: opener, framing and pose, face and hair, then the rest.",
-"8. Background: a few concrete words. Never 'plain simple background', never 'minimal background detail'.",
-"9. No gloss or rendering words (glossy, shiny, reflections, polished).",
-"10. No sexualised framing, no revealing clothing, no camera focus on the body.",
-"11. Keep every concrete detail the user gave. Invent nothing beyond connective wording.",
+"4. The clothing block ends with: "+t.wear,
+"5. Comma-separated lowercase phrases. No sentences, no line breaks, no full stops.",
+"6. Adult proportions stated explicitly. Never any wording implying a child.",
+"7. Name the colour of the single most important garment twice.",
+"8. Order inside a block: opener, framing and pose, face and hair, then the rest.",
+"9. Background: a few concrete words. Never 'plain simple background', never 'minimal background detail'.",
+"10. No gloss or rendering words (glossy, shiny, reflections, polished).",
+"11. No sexualised framing, no revealing clothing, no camera focus on the body.",
+"12. Keep every concrete detail the user gave. Invent nothing beyond connective wording.",
 "",
 "The notes may be in Russian. Translate into natural English prompt language and fix wording.",
 "",
@@ -598,18 +733,21 @@ function readForm(){
 }
 function setStatus(id,msg,err){var el=$(id);el.textContent=msg;el.className="status"+(err?" err":"")}
 
-function runLocal(v,quiet){
+function runLocal(v){
   var r=localBuild(v);
   state.result=r;state.lastForm=v;
   render(r,v,"словарь");
   paintPending();
-  if(!quiet) show("tab-out");
 }
 
 $("btn-build").addEventListener("click",function(){
   var v=readForm();
   if(!v.look&&!v.wear&&!v.pose){setStatus("st-build","Заполните хотя бы внешность, одежду или позу.",true);return}
-  if(v.mode==="local"){ setStatus("st-build",""); runLocal(v); return; }
+  if(v.mode==="local"){
+    setStatus("st-build","");runLocal(v);show("tab-out");
+    toast(state.pending.length? ("Собрано · "+state.pending.length+" без перевода") : "Готово");
+    return;
+  }
   var btn=$("btn-build");btn.disabled=true;setStatus("st-build","Отправляю запрос…");
   claudePromise.then(function(sample){
     if(!sample) throw new Error("Claude недоступен в этом просмотре");
@@ -617,13 +755,15 @@ $("btn-build").addEventListener("click",function(){
   }).then(function(d){
     if(!d||!d.appearance) throw new Error("Пустой ответ");
     state.pending=[];paintPending();
-    var r={appearance:d.appearance,clothing:d.clothing,action:d.action,negative:NEG,portrait:d.portrait,notes:d.notes||""};
+    var t=getStyle(v.style);
+    var r={appearance:d.appearance,clothing:d.clothing,action:d.action,negative:t.neg||"blurry, low quality, deformed hands, extra fingers",portrait:d.portrait,notes:d.notes||""};
     state.result=r;state.lastForm=v;render(r,v,"Claude");
-    btn.disabled=false;setStatus("st-build","");show("tab-out");
+    btn.disabled=false;setStatus("st-build","");show("tab-out");toast("Готово");
   }).catch(function(e){
     btn.disabled=false;
-    runLocal(v);
+    runLocal(v);show("tab-out");
     setStatus("st-build",(e&&e.message?e.message:"Ошибка")+" — собрал по словарю.",true);
+    toast("Claude не ответил");
   });
 });
 
@@ -644,11 +784,15 @@ function render(r,v,via){
   $("o-app").value=r.appearance||"";
   $("o-clo").value=r.clothing||"";
   $("o-act").value=r.action||"";
-  $("o-neg").value=r.negative||NEG;
+  $("o-neg").value=r.negative||"";
   $("o-por").value=r.portrait||"";
-  OUT.forEach(function(o){count(o[1],$(o[0]).value)});
-  setTimeout(autosizeAll,0);
-  var meta=(v.name?v.name+" · ":"")+(v.style==="dark"?"Dark":"Casual")+" · "+via;
+  OUT.forEach(function(o){
+    count(o[1],$(o[0]).value);
+    var el=$(o[0]);el.classList.remove("flash");void el.offsetWidth;el.classList.add("flash");
+  });
+  setTimeout(autosizeAll,30);
+  var st=getStyle(v.style||"dark");
+  var meta=(v.name?v.name+" · ":"")+(st.name||"")+" · "+via;
   $("out-meta").textContent=meta+(r.notes?" — "+r.notes:"");
   setStatus("st-save","");
 }
@@ -663,14 +807,14 @@ document.querySelectorAll("[data-copy]").forEach(function(b){
         "\n\nPORTRAIT\n"+$("o-por").value;
     } else { text=$(key).value; }
     if(!text)return;
-    var old=b.textContent;
-    var done=function(){b.textContent="Готово";setTimeout(function(){b.textContent=old},1500)};
-    try{navigator.clipboard.writeText(text).then(done,function(){selArea(key)})}catch(e){selArea(key)}
+    var done=function(){toast(key==="ALL"?"Скопировано целиком":"Скопировано")};
+    try{navigator.clipboard.writeText(text).then(done,function(){selArea(key);toast("Выделено — скопируйте вручную")})}
+    catch(e){selArea(key);toast("Выделено — скопируйте вручную")}
   });
 });
 function selArea(key){if(key==="ALL")return;var el=$(key);if(!el)return;el.focus();el.select()}
 
-/* ---------- экран непонятых фраз ---------- */
+/* ---------- непонятые фразы ---------- */
 $("btn-to-dict").addEventListener("click",function(){show("tab-dict")});
 
 function paintPending(){
@@ -681,8 +825,10 @@ function paintPending(){
   var box=$("pending-list");box.innerHTML="";
   p.forEach(function(u,i){
     var d=document.createElement("div");d.className="term";
+
     var w=document.createElement("span");w.className="where";w.textContent=FIELD_NAMES[u.field]||u.field;
-    var s=document.createElement("span");s.className="src";s.textContent=u.phrase;
+    d.appendChild(w);
+
     var c=document.createElement("span");c.className="ctx";
     if(u.context && u.context!==u.phrase){
       var idx=u.context.toLowerCase().indexOf(u.phrase.toLowerCase());
@@ -693,9 +839,20 @@ function paintPending(){
         c.appendChild(document.createTextNode(u.context.slice(idx+u.phrase.length)));
       } else { c.textContent="в строке: "+u.context; }
     } else { c.textContent="отдельная фраза"; }
-    var inp=document.createElement("input");inp.type="text";inp.placeholder="english phrase";
-    inp.setAttribute("data-ru",u.norm);inp.id="pend-"+i;inp.autocomplete="off";
-    d.appendChild(w);d.appendChild(s);d.appendChild(c);d.appendChild(inp);
+    d.appendChild(c);
+
+    var lr=document.createElement("label");lr.textContent="Русская фраза";
+    lr.setAttribute("for","pend-ru-"+i);d.appendChild(lr);
+    var ru=document.createElement("input");ru.type="text";ru.id="pend-ru-"+i;
+    ru.value=u.phrase;ru.autocomplete="off";ru.className="pend-ru";
+    d.appendChild(ru);
+
+    var le=document.createElement("label");le.textContent="Английский вариант";
+    le.setAttribute("for","pend-en-"+i);d.appendChild(le);
+    var en=document.createElement("input");en.type="text";en.id="pend-en-"+i;
+    en.placeholder="english phrase";en.autocomplete="off";en.className="pend-en";
+    d.appendChild(en);
+
     box.appendChild(d);
   });
   updateDot();
@@ -708,16 +865,19 @@ function updateDot(){
 
 $("btn-learn").addEventListener("click",function(){
   var u=userDict(),added=0;
-  $("pending-list").querySelectorAll("input[data-ru]").forEach(function(inp){
-    var en=inp.value.trim();
-    if(en){u[inp.getAttribute("data-ru")]=en;added++}
-  });
-  if(!added){setStatus("st-learn","Ничего не заполнено.",true);return}
+  var rus=$("pending-list").querySelectorAll(".pend-ru");
+  var ens=$("pending-list").querySelectorAll(".pend-en");
+  for(var i=0;i<rus.length;i++){
+    var ru=normalize(rus[i].value), en=ens[i].value.trim();
+    if(ru && en){u[ru]=en;added++}
+  }
+  if(!added){setStatus("st-learn","Заполните хотя бы одну пару.",true);toast("Нечего запоминать");return}
   userDictPut(u);dictChanged();
-  setStatus("st-learn","Запомнено: "+added+". Пересобираю.");
+  setStatus("st-learn","");
+  toast("Запомнено: "+added);
   var v=state.lastForm||readForm();
   runLocal(v);
-  setTimeout(function(){show("tab-out")},250);
+  setTimeout(function(){show("tab-out")},320);
 });
 $("btn-skip").addEventListener("click",function(){
   state.pending=[];paintPending();setStatus("st-learn","");show("tab-out");
@@ -726,9 +886,10 @@ $("btn-skip").addEventListener("click",function(){
 /* ---------- мои термины ---------- */
 $("btn-add").addEventListener("click",function(){
   var ru=normalize($("add-ru").value), en=$("add-en").value.trim();
-  if(!ru||!en)return;
+  if(!ru||!en){toast("Заполните оба поля");return}
   var u=userDict();u[ru]=en;userDictPut(u);dictChanged();
   $("add-ru").value="";$("add-en").value="";
+  toast("Термин добавлен");
 });
 function paintDict(){
   var u=userDict(),keys=Object.keys(u).sort();
@@ -736,11 +897,16 @@ function paintDict(){
   $("dict-empty").hidden = keys.length>0;
   keys.forEach(function(k){
     var li=document.createElement("li");
-    var nm=document.createElement("span");nm.className="nm";nm.textContent=k+" → "+u[k];
+    var nm=document.createElement("span");nm.className="nm";
+    nm.textContent=k;
+    var sm=document.createElement("small");sm.textContent=u[k];nm.appendChild(sm);
     var ed=document.createElement("button");ed.className="btn ghost small";ed.textContent="В поля";
-    ed.addEventListener("click",function(){$("add-ru").value=k;$("add-en").value=u[k]});
+    ed.addEventListener("click",function(){$("add-ru").value=k;$("add-en").value=u[k];toast("Перенесено в поля")});
     var dl=document.createElement("button");dl.className="btn ghost small";dl.textContent="Удалить";
-    dl.addEventListener("click",function(){var x=userDict();delete x[k];userDictPut(x);dictChanged()});
+    dl.addEventListener("click",function(){
+      li.classList.add("going");
+      setTimeout(function(){var x=userDict();delete x[k];userDictPut(x);dictChanged();toast("Удалено")},180);
+    });
     li.appendChild(nm);li.appendChild(ed);li.appendChild(dl);
     ul.appendChild(li);
   });
@@ -751,16 +917,94 @@ $("btn-export").addEventListener("click",function(){
   var ta=$("dict-export");
   ta.hidden=false;ta.value=lines.join("\n")||"(пусто)";autosize(ta);ta.focus();ta.select();
 });
-$("btn-clear").addEventListener("click",function(){
-  var ta=$("dict-export");
-  if(ta.dataset.armed==="1"){
-    userDictPut({});dictChanged();ta.dataset.armed="";
-    $("btn-clear").textContent="Очистить мои термины";
-  } else {
-    ta.dataset.armed="1";
-    $("btn-clear").textContent="Точно очистить? Нажмите ещё раз";
-    setTimeout(function(){ta.dataset.armed="";$("btn-clear").textContent="Очистить мои термины"},4000);
+var dclearArmed=false,dclearTimer=null;
+$("btn-dclear").addEventListener("click",function(){
+  var b=$("btn-dclear");
+  if(!dclearArmed){
+    dclearArmed=true;b.textContent="Точно? Ещё раз";
+    dclearTimer=setTimeout(function(){dclearArmed=false;b.textContent="Очистить мои термины"},4000);
+    return;
   }
+  clearTimeout(dclearTimer);dclearArmed=false;b.textContent="Очистить мои термины";
+  userDictPut({});dictChanged();toast("Словарь очищен");
+});
+
+/* ---------- экран стилей ---------- */
+function paintStyles(){
+  var ul=$("style-list");ul.innerHTML="";
+  allStyles().forEach(function(s){
+    var li=document.createElement("li");
+    var nm=document.createElement("span");nm.className="nm";nm.textContent=s.name;
+    var chip=document.createElement("span");chip.className="chip";
+    chip.textContent=s.builtin?"встроенный":"свой";
+    li.appendChild(nm);li.appendChild(chip);
+    if(!s.builtin){
+      var ed=document.createElement("button");ed.className="btn ghost small";ed.textContent="Править";
+      ed.addEventListener("click",function(){openStyle(s.id)});
+      var dl=document.createElement("button");dl.className="btn ghost small";dl.textContent="Удалить";
+      dl.addEventListener("click",function(){
+        li.classList.add("going");
+        setTimeout(function(){
+          var u=userStyles();delete u[s.id];userStylesPut(u);
+          if($("f-style").value===s.id){$("f-style").value="dark";saveDraft()}
+          paintStyles();fillStyleSelect();
+          if(state.styleEdit===s.id){state.styleEdit=null;$("style-editor").hidden=true}
+          toast("Стиль удалён");
+        },180);
+      });
+      li.appendChild(ed);li.appendChild(dl);
+    } else {
+      var cp=document.createElement("button");cp.className="btn ghost small";cp.textContent="Копия";
+      cp.addEventListener("click",function(){cloneStyle(s.id)});
+      li.appendChild(cp);
+    }
+    ul.appendChild(li);
+  });
+}
+function cloneStyle(fromId){
+  var src=getStyle(fromId);
+  var id="s"+Date.now();
+  var u=userStyles();
+  u[id]={id:id,name:src.name.replace(/ —.*$/,"")+" (копия)",builtin:false,note:src.note||"",
+         app:src.app,clo:src.clo,wear:src.wear,act:src.act,end:src.end,por:src.por,neg:src.neg};
+  userStylesPut(u);paintStyles();fillStyleSelect();openStyle(id);
+  toast("Копия создана");
+}
+$("btn-new-dark").addEventListener("click",function(){cloneStyle("dark")});
+$("btn-new-casual").addEventListener("click",function(){cloneStyle("casual")});
+
+function openStyle(id){
+  var s=getStyle(id);
+  state.styleEdit=id;
+  $("editor-title").textContent=s.name;
+  $("s-name").value=s.name||"";$("s-note").value=s.note||"";
+  $("s-app").value=s.app||"";$("s-clo").value=s.clo||"";$("s-wear").value=s.wear||"";
+  $("s-act").value=s.act||"";$("s-end").value=s.end||"";$("s-por").value=s.por||"";
+  $("s-neg").value=s.neg||"";
+  $("style-editor").hidden=false;
+  setStatus("st-style","");
+  setTimeout(function(){
+    ["s-app","s-clo","s-act","s-end","s-por"].forEach(function(k){autosize($(k))});
+    $("style-editor").scrollIntoView({behavior:"smooth",block:"start"});
+  },40);
+}
+$("btn-style-close").addEventListener("click",function(){
+  $("style-editor").hidden=true;state.styleEdit=null;
+});
+$("btn-style-save").addEventListener("click",function(){
+  var id=state.styleEdit;if(!id)return;
+  var name=$("s-name").value.trim();
+  if(!name){setStatus("st-style","Название не может быть пустым.",true);return}
+  var u=userStyles();
+  u[id]={id:id,name:name,builtin:false,note:$("s-note").value.trim(),
+    app:$("s-app").value.trim(),clo:$("s-clo").value.trim(),wear:$("s-wear").value.trim(),
+    act:$("s-act").value.trim(),end:$("s-end").value.trim(),por:$("s-por").value.trim(),
+    neg:$("s-neg").value.trim()||"blurry, low quality, deformed hands, extra fingers"};
+  userStylesPut(u);
+  paintStyles();fillStyleSelect();styleNote();
+  $("editor-title").textContent=name;
+  setStatus("st-style","");
+  toast("Стиль сохранён");
 });
 
 /* ---------- архив ---------- */
@@ -768,7 +1012,7 @@ function listGet(){try{return JSON.parse(localStorage.getItem("forge-chars")||"[
 function listPut(a){try{localStorage.setItem("forge-chars",JSON.stringify(a))}catch(e){}}
 
 $("btn-save").addEventListener("click",function(){
-  if(!state.result){setStatus("st-save","Сначала соберите промпты.",true);return}
+  if(!state.result){setStatus("st-save","Сначала соберите промпты.",true);toast("Нечего сохранять");return}
   var v=readForm();
   var res={appearance:$("o-app").value,clothing:$("o-clo").value,action:$("o-act").value,
            negative:$("o-neg").value,portrait:$("o-por").value,notes:state.result.notes||""};
@@ -777,7 +1021,8 @@ $("btn-save").addEventListener("click",function(){
   state.editingId=rec.id;
   var a=listGet().filter(function(x){return x.id!==rec.id});
   a.unshift(rec);listPut(a);paintList();
-  setStatus("st-save","Сохранено на устройстве.");
+  setStatus("st-save","");
+  toast("Сохранено");
 });
 
 function paintList(){
@@ -787,27 +1032,39 @@ function paintList(){
   a.forEach(function(rec){
     var li=document.createElement("li");
     var nm=document.createElement("span");nm.className="nm";nm.textContent=rec.name;
-    var chip=document.createElement("span");chip.className="chip";chip.textContent=rec.style==="dark"?"Dark":"Casual";
+    var chip=document.createElement("span");chip.className="chip";
+    chip.textContent=(getStyle(rec.style).name||"").replace(/ —.*$/,"");
     var op=document.createElement("button");op.className="btn ghost small";op.textContent="Открыть";
     op.addEventListener("click",function(){openRec(rec)});
     var dl=document.createElement("button");dl.className="btn ghost small";dl.textContent="Удалить";
-    dl.addEventListener("click",function(){listPut(listGet().filter(function(x){return x.id!==rec.id}));paintList()});
+    dl.addEventListener("click",function(){
+      li.classList.add("going");
+      setTimeout(function(){listPut(listGet().filter(function(x){return x.id!==rec.id}));paintList();toast("Удалено")},180);
+    });
     li.appendChild(nm);li.appendChild(chip);li.appendChild(op);li.appendChild(dl);
     ul.appendChild(li);
   });
 }
 function openRec(rec){
   var f=rec.form||{};
-  $("f-name").value=f.name||rec.name||"";$("f-style").value=f.style||"dark";
+  $("f-name").value=f.name||rec.name||"";
+  fillStyleSelect();
+  $("f-style").value = allStyles().some(function(s){return s.id===f.style}) ? f.style : "dark";
   $("f-sex").value=f.sex||"woman";$("f-mode").value=f.mode||"local";
   $("f-look").value=f.look||"";$("f-mood").value=f.mood||"";$("f-wear").value=f.wear||"";
   $("f-pose").value=f.pose||"";$("f-scene").value=f.scene||"";
   styleNote();modeNote();saveDraft();
   state.result=rec.result;state.editingId=rec.id;state.pending=[];state.lastForm=f;
   paintPending();render(rec.result||{},f,"сохранённое");show("tab-out");
+  toast("Загружено: "+rec.name);
 }
 
-paintDict();paintList();paintPending();
+/* ---------- старт ---------- */
+fillStyleSelect();
+loadDraft();
+fillStyleSelect();
+styleNote();modeNote();
+paintStyles();paintDict();paintList();paintPending();
 window.addEventListener("resize",function(){if(!$("screen-out").hidden)autosizeAll()});
 </script>
 
