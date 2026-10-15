@@ -44,6 +44,7 @@ img{max-width:100%}
 }
 *{box-sizing:border-box}
 html,body{height:100%}
+html{background:var(--paper)}
 body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;margin:0;display:flex;flex-direction:column}
 .topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--paper);border-bottom:1px solid var(--rule);padding:12px 14px 0;display:flex;flex-direction:column;gap:9px}
 .brand{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
@@ -200,7 +201,7 @@ h2.sec{font-size:17px;letter-spacing:-.01em;font-weight:600}
 </head>
 <body>
 <div class="topbar">
-  <div class="brand"><h1>Штриховая мастерская</h1><span id="badge">0.12 · офлайн</span></div>
+  <div class="brand"><h1>Штриховая мастерская</h1><span id="badge">0.13 · офлайн</span></div>
   <button class="topbtn" id="btn-theme" aria-label="Оформление"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.6c-4.7 0-8.4 3.5-8.4 7.9 0 4.4 3.3 7.3 7.1 7.3 1.5 0 2.2-.8 2.2-1.8 0-.9-.7-1.4-.7-2.2 0-.8.6-1.4 1.5-1.4h1.6c3 0 5.1-2 5.1-5 0-3.1-3.4-4.8-8.4-4.8z"/><circle cx="7.7" cy="11.2" r="1.1" fill="currentColor" stroke="none"/><circle cx="11" cy="7.9" r="1.1" fill="currentColor" stroke="none"/><circle cx="15.4" cy="8.6" r="1.1" fill="currentColor" stroke="none"/></svg></button>
 </div>
 
@@ -396,6 +397,12 @@ h2.sec{font-size:17px;letter-spacing:-.01em;font-weight:600}
 
 <!-- АРХИВ -->
 <div class="screen" id="screen-list" hidden>
+  <div class="row">
+    <button class="btn ghost small" id="btn-import">Добавить из файла</button>
+    <button class="btn ghost small" id="btn-import-link">Вставить ссылку</button>
+    <button class="btn ghost small" id="btn-export-all">Выгрузить архив</button>
+  </div>
+  <input type="file" id="imp-file" accept=".json,application/json,text/plain" hidden>
   <ul class="list" id="char-list"></ul>
   <div class="empty" id="list-empty">Пока пусто. Соберите персонажа и нажмите «Сохранить».</div>
 
@@ -704,7 +711,142 @@ var DICT = {
 "свет лампы":"lamplight","свет свечи":"candlelight","свет из окна":"light through a window",
 "свет экрана":"the glow of a screen","факелы":"burning torches","люстра":"a chandelier",
 "полумрак":"dim light","тени":"deep shadows","туман":"mist","дождь":"rain",
-"снег":"falling snow","ветер":"wind"
+"снег":"falling snow","ветер":"wind",
+/* --- 0.13: расширенный словарь --- */
+"белая":"white","белые":"white","чёрная":"black","чёрные":"black","черный":"black","черная":"black","черные":"black","серая":"grey","серые":"grey",
+"тёмно-серая":"dark grey","тёмно-серые":"dark grey","светло-серый":"pale grey","светло-серая":"pale grey","светло-серые":"pale grey",
+"угольный":"charcoal","угольная":"charcoal","угольные":"charcoal","красная":"red","красные":"red","тёмно-красный":"dark red",
+"тёмно-красная":"dark red","тёмно-красные":"dark red","алый":"scarlet","алая":"scarlet","алые":"scarlet","бордовая":"deep burgundy",
+"бордовые":"deep burgundy","малиновый":"crimson","малиновая":"crimson","малиновые":"crimson","розовая":"pink","розовые":"pink",
+"бледно-розовый":"pale pink","бледно-розовая":"pale pink","бледно-розовые":"pale pink","оранжевая":"warm orange","оранжевые":"warm orange",
+"ржавая":"rust orange","ржавые":"rust orange","персиковый":"peach","персиковая":"peach","персиковые":"peach","жёлтая":"yellow","жёлтые":"yellow",
+"желтый":"yellow","желтая":"yellow","желтые":"yellow","горчичный":"mustard yellow","горчичная":"mustard yellow","горчичные":"mustard yellow",
+"золотая":"gold","золотые":"gold","янтарный":"amber","янтарная":"amber","янтарные":"amber","бежевая":"beige","бежевые":"beige",
+"песочный":"sand beige","песочная":"sand beige","песочные":"sand beige","кремовая":"cream","кремовые":"cream","молочный":"ivory","молочная":"ivory",
+"молочные":"ivory","коричневая":"brown","коричневые":"brown","шоколадный":"chocolate brown","шоколадная":"chocolate brown",
+"шоколадные":"chocolate brown","зелёная":"green","зелёные":"green","зеленый":"green","зеленая":"green","зеленые":"green","тёмно-зелёный":"dark green",
+"тёмно-зелёная":"dark green","тёмно-зелёные":"dark green","оливковая":"olive green","оливковые":"olive green","изумрудный":"emerald green",
+"изумрудная":"emerald green","изумрудные":"emerald green","мятный":"mint green","мятная":"mint green","мятные":"mint green","голубая":"pale blue",
+"голубые":"pale blue","синяя":"deep blue","синие":"deep blue","тёмно-синяя":"navy blue","тёмно-синие":"navy blue","бирюзовая":"teal",
+"бирюзовые":"teal","фиолетовая":"violet","фиолетовые":"violet","сиреневый":"lavender","сиреневая":"lavender","сиреневые":"lavender","лиловый":"lilac",
+"лиловая":"lilac","лиловые":"lilac","пурпурный":"purple","пурпурная":"purple","пурпурные":"purple","серебряная":"silver","серебряные":"silver",
+"медный":"copper","медная":"copper","медные":"copper","бронзовый":"bronze","бронзовая":"bronze","бронзовые":"bronze","прозрачный":"translucent",
+"прозрачная":"translucent","прозрачные":"translucent","очень высокая":"very tall","очень высокий":"very tall","низкого роста":"short",
+"миниатюрная":"petite","среднего роста":"of average height","долговязый":"lanky","долговязая":"lanky","костлявая":"bony","крепкая":"sturdy",
+"крепкий":"sturdy","коренастый":"stocky","massive":"heavyset","грузный":"heavyset","мягкий живот":"a soft stomach","широкая спина":"a broad back",
+"покатые плечи":"sloping shoulders","длинная шея":"a long neck","тонкая шея":"a slender neck","тонкие запястья":"thin wrists",
+"большие руки":"large hands","изящные пальцы":"slender fingers","сильные руки":"strong arms","длинные пальцы":"long fingers",
+"сутулая":"slightly hunched","сутулый":"slightly hunched","прямая осанка":"straight posture","осиная талия":"a very narrow waist",
+"пышная грудь":"a full chest","маленькая голова":"a small head","юношеская фигура":"a youthful build","рельефные мышцы":"defined muscles",
+"вытянутое лицо":"a long face","квадратное лицо":"a square face","широкое лицо":"a broad face","детское лицо":"a soft youthful face",
+"усталое лицо":"a tired face","худые щёки":"hollow cheeks","пухлые щёки":"full cheeks","узкий подбородок":"a narrow chin",
+"тяжёлая челюсть":"a heavy jaw","ямочка на подбородке":"a chin dimple","морщины":"fine lines","морщины у глаз":"crow's feet",
+"сжатые губы":"a pressed thin mouth","приоткрытые губы":"slightly parted lips","кривая улыбка":"a crooked smile","острый нос":"a sharp nose",
+"широкий нос":"a wide nose","горбинка на носу":"a nose with a slight bump","веснушки на щеках":"freckles across the cheeks",
+"родинка под глазом":"a beauty mark under one eye","шрам на губе":"a thin scar through the lip","шрам через лицо":"a scar across the face",
+"бледные губы":"pale lips","обветренные губы":"chapped lips","острые черты":"angular features","миндалевидные глаза":"almond shaped eyes",
+"раскосые глаза":"upturned eyes","опущенные глаза":"downturned eyes","глубоко посаженные глаза":"deep set eyes",
+"широко посаженные глаза":"wide set eyes","усталые глаза":"tired eyes","заплаканные глаза":"eyes red from crying","влажные глаза":"wet shining eyes",
+"пустой взгляд":"a blank stare","тяжёлый взгляд":"a heavy stare","острый взгляд":"a sharp gaze","прищур":"narrowed eyes",
+"вертикальный зрачок":"slit pupils","золотые глаза":"golden eyes","красные глаза":"red eyes","чёрные глаза":"solid black eyes",
+"белые ресницы":"white lashes","густые ресницы":"thick lashes","подводка":"sharp eyeliner","тени на веках":"smoky eyeshadow",
+"прямые брови":"straight eyebrows","высокие брови":"high arched eyebrows","поднятая бровь":"one eyebrow raised",
+"выбритая бровь":"a shaved slit in one eyebrow","монокль":"a monocle","повязка на глазу":"an eye patch","солнечные очки":"dark sunglasses",
+"очки в толстой оправе":"thick framed glasses","очень короткие волосы":"cropped short hair","стрижка под машинку":"a buzz cut",
+"бритая голова":"a shaved head","выбритый висок":"an undercut on one side","ирокез":"a mohawk","каре до плеч":"a shoulder length bob",
+"боб":"a short bob","волосы до подбородка":"chin length hair","волосы до лопаток":"hair to the shoulder blades","волосы до пояса":"waist length hair",
+"мелкие кудри":"tight curls","крупные локоны":"loose curls","густые волосы":"thick hair","тонкие волосы":"fine thin hair",
+"гладко зачёсанные волосы":"slicked back hair","зачёсанные назад волосы":"hair swept back","пробор сбоку":"a side parting",
+"прямой пробор":"a centre parting","косая чёлка":"a side swept fringe","рваная чёлка":"a choppy fringe","длинная чёлка":"a long fringe over the eyes",
+"хвост":"a tail","два хвоста":"twin tails","низкий пучок":"a low chignon","небрежный пучок":"a messy bun","французская коса":"a french braid",
+"колосок":"a fishtail braid","дреды":"dreadlocks","афро":"an afro","косички":"cornrows","выбившаяся прядь":"one loose strand",
+"мокрые волосы":"damp hair","волосы на ветру":"hair caught in the wind","седая прядь":"one grey streak","цветные пряди":"dyed streaks",
+"волосы собраны":"hair tied up","распущенные волосы":"hair worn loose","блестящие волосы":"glossy hair","матовые волосы":"matte hair",
+"щетина":"stubble","лёгкая щетина":"light stubble","короткая борода":"a short beard","густая борода":"a full beard","длинная борода":"a long beard",
+"козлиная бородка":"a goatee","усы":"a moustache","бакенбарды":"sideburns","гладко выбрит":"clean shaven","золотистая кожа":"golden skin",
+"оливковая кожа":"olive skin","пятна на коже":"patches of discolouration","шрамы":"old scars","ожог":"a burn scar","татуировка":"a tattoo",
+"татуировка на шее":"a neck tattoo","татуировка на руке":"a sleeve tattoo","руны на коже":"runes marked on the skin",
+"светящиеся узоры":"faintly glowing markings","пирсинг":"a piercing","пирсинг в носу":"a nose ring","серьги в ушах":"multiple ear piercings",
+"тоннели":"ear tunnels","чешуя на щеках":"scales along the cheeks","пот":"sweat on the skin","капли пота":"beads of sweat",
+"грязь на лице":"dirt smudged on the face","кровь на лице":"blood on the face","бинты":"bandages","повязка на руке":"a bandaged hand",
+"майка":"a tank top","лонгслив":"a long sleeved shirt","клетчатая рубашка":"a plaid flannel shirt","поло":"a polo shirt",
+"вязаный свитер":"a chunky knit sweater","толстовка":"a sweatshirt","костюм":"a tailored suit","деловой костюм":"a sharp business suit",
+"смокинг":"a tuxedo","тренч":"a belted trench coat","куртка":"a jacket","бомбер":"a bomber jacket","парка":"a parka","пуховик":"a puffer coat",
+"ветровка":"a windbreaker","рваные джинсы":"ripped jeans","широкие брюки":"wide leg trousers","карго":"cargo trousers",
+"юбка-карандаш":"a pencil skirt","халат":"a robe","банный халат":"a bathrobe","кимоно":"a kimono","ханьфу":"a hanfu robe","ряса":"a monastic robe",
+"доспехи":"plate armour","кожаный доспех":"leather armour","поножи":"greaves","форма":"a uniform","военная форма":"a military uniform",
+"школьная форма":"a school uniform","лабораторный халат":"a lab coat","комбинезон рабочий":"work overalls","гольфы":"knee socks",
+"кожаные перчатки":"leather gloves","шляпа":"a hat","шляпа с полями":"a wide brimmed hat","кепка":"a cap","шапка":"a knitted beanie",
+"капюшон":"a hood","вуаль":"a veil","галстук":"a tie","бабочка":"a bow tie","подтяжки":"suspenders","портупея":"a harness",
+"пояс с сумками":"a utility belt","высокие ботинки":"tall boots","берцы":"combat boots","лоферы":"loafers","кеды":"canvas sneakers",
+"сандалии":"sandals","ожерелье":"a necklace","браслет":"a bracelet","кожаный браслет":"a leather cuff","кольцо":"a ring","перстень":"a signet ring",
+"обручальное кольцо":"a wedding band","серьги-кольца":"hoop earrings","карманные часы":"a pocket watch","брошь":"a brooch","заколка":"a hair clip",
+"лента в волосах":"a ribbon in the hair","венок":"a flower crown","диадема":"a circlet","амулет":"an amulet","медальон":"a locket",
+"очки на цепочке":"glasses on a chain","наушники":"headphones","наушники на шее":"headphones around the neck","телефон":"a phone",
+"сумка через плечо":"a shoulder bag","портфель":"a leather briefcase","папка":"a folder","блокнот":"a notebook","планшет":"a tablet","шёлк":"silk",
+"шелковая":"silk","бархат":"velvet","лён":"linen","хлопок":"cotton","шерсть":"wool","кожа материал":"leather","замша":"suede","деним":"denim",
+"кружево":"lace","тюль":"tulle","трикотаж":"knit fabric","атлас":"satin","мех":"fur trim","металл":"metal","дерево":"wood","камень":"stone",
+"стекло":"glass","латунь":"brass","ржавый металл":"rusted metal","стол":"a table","письменный стол":"a writing desk","рабочий стол":"a desk",
+"обеденный стол":"a dining table","журнальный столик":"a low coffee table","барная стойка":"a bar counter","стойка":"a counter","стул":"a chair",
+"деревянный стул":"a wooden chair","офисное кресло":"an office chair","кресло":"an armchair","кожаное кресло":"a leather armchair","диван":"a sofa",
+"кушетка":"a couch","табурет":"a stool","скамья":"a bench","кровать":"a bed","двуспальная кровать":"a double bed","изголовье":"a headboard",
+"матрас":"a mattress","подушки":"pillows","одеяло":"a blanket","плед":"a throw blanket","простыни":"rumpled sheets","тумбочка":"a bedside table",
+"комод":"a chest of drawers","шкаф":"a wardrobe","книжный шкаф":"a bookcase","полка":"a shelf","полки с книгами":"shelves of books",
+"стеллаж":"open shelving","сундук":"a wooden chest","ящики":"wooden crates","зеркало":"a mirror","большое зеркало":"a tall mirror","ковёр":"a rug",
+"занавески":"curtains","жалюзи":"window blinds","картина на стене":"a framed painting","постеры":"posters on the wall","часы на стене":"a wall clock",
+"торшер":"a floor lamp","настольная лампа":"a desk lamp","светильник":"a lamp","гирлянда":"string lights","камин":"a fireplace","печь":"a stove",
+"раковина":"a sink","плита":"a cooker","опенспейс":"an open plan office","переговорная":"a meeting room","кабинет":"a private office",
+"приёмная":"a reception area","лифт":"a lift","чердак":"an attic","класс":"a classroom","аудитория":"a lecture hall",
+"коридор школы":"a school corridor","общежитие":"a dorm room","больничная палата":"a hospital room","часовня":"a chapel",
+"трактир":"an inn common room","лавка":"a small shop","серверная":"a server room","гараж":"a garage","холл":"a hotel lobby","рынок":"a market",
+"набережная":"a waterfront promenade","мост":"a bridge","двор":"a courtyard","парковка":"a car park","автобусная остановка":"a bus stop",
+"вокзал":"a railway station","перрон":"a station platform","метро":"a metro platform","аэропорт":"an airport terminal","сад":"a garden",
+"оранжерея":"a greenhouse","кладбище":"a graveyard","крепость":"a fortress","башня":"a stone tower","деревня":"a village","ферма":"a farm",
+"мельница":"a mill","порт":"a harbour","подземелье":"a dungeon","шахта":"a mine tunnel","лагерь":"a camp","костёр":"a campfire","палатка":"a tent",
+"сосновый лес":"a pine forest","опушка":"a forest clearing","луг":"a meadow","холмы":"rolling hills","скалы":"cliffs","берег":"a shoreline",
+"море":"the sea","озеро":"a lake","река":"a river","водопад":"a waterfall","болото":"a marsh","пустыня":"a desert","тундра":"frozen tundra",
+"снегопад":"falling snow","метель":"a snowstorm","ливень":"heavy rain","гроза":"a thunderstorm","молния":"lightning","радуга":"a rainbow",
+"облака":"clouds","звёздное небо":"a starry sky","луна":"the moon","полная луна":"a full moon","сумерки":"dusk","полдень":"midday",
+"листопад":"falling leaves","лепестки":"falling petals","трава":"tall grass","цветы":"flowers","деревья":"trees","корни":"gnarled roots",
+"книга":"a book","открытая книга":"an open book","стопка книг":"a stack of books","свиток":"a scroll","письмо":"a letter","карта":"a map",
+"перо":"a quill pen","чернильница":"an inkwell","карандаш":"a pencil","кисть":"a paintbrush","мольберт":"an easel","гитара":"a guitar",
+"скрипка":"a violin","пианино":"a piano","копьё":"a spear","пистолет":"a pistol","фонарь":"a lantern","свеча":"a candle","свечи":"lit candles",
+"факел":"a torch","ключ":"an old key","монеты":"coins","зеркальце":"a hand mirror","веер":"a folding fan","зонт":"an umbrella","чемодан":"a suitcase",
+"рюкзак школьный":"a school backpack","клетка":"a birdcage","ваза":"a vase","горшок с цветком":"a potted plant","свиток с печатью":"a sealed scroll",
+"кристалл":"a glowing crystal","флакон":"a small vial","склянки":"glass vials","котёл":"a cauldron","чашка":"a cup","чашка кофе":"a cup of coffee",
+"кружка":"a mug","стакан":"a glass","бокал":"a wine glass","бутылка":"a bottle","чайник":"a teapot","тарелка":"a plate","поднос":"a tray",
+"торт":"a cake","выпечка":"pastries","хлеб":"bread","фрукты":"fruit","яблоко":"an apple","суп":"a bowl of soup","жёсткий свет":"hard light",
+"контровой свет":"rim light","свет сверху":"light from above","свет сбоку":"side lighting","неоновый свет":"neon light",
+"свет фонарей":"streetlight glow","солнечные лучи":"shafts of sunlight","блики":"bright highlights","длинные тени":"long shadows",
+"силуэт":"a silhouette","подсветка снизу":"uplighting","мерцание":"flickering light","ухмылка":"a smirk","злая ухмылка":"a sharp smirk",
+"смех":"laughing","хохот":"laughing hard","слёзы":"tears","слёзы на щеках":"tears running down the cheeks","плачет":"crying",
+"сдерживает слёзы":"holding back tears","хмурится":"frowning","злость":"an angry expression","ярость":"a furious expression",
+"страх":"a frightened expression","ужас":"a terrified expression","удивление":"a surprised expression","шок":"a shocked expression",
+"растерянность":"a confused expression","смущение":"an embarrassed expression","стыд":"a shamed expression","гордость":"a proud expression",
+"усталость":"an exhausted expression","скука":"a bored expression","презрение":"a contemptuous expression","нежность":"a tender expression",
+"тоска":"a wistful expression","спокойствие":"a calm expression","решимость":"a determined expression","сосредоточенность":"a focused expression",
+"закусила губу":"biting the lower lip","прикрыла рот рукой":"a hand over the mouth","лежит":"lying down","прыгает":"mid jump","танцует":"dancing",
+"падает":"falling","оборачивается":"turning to look back","скрестила руки":"arms crossed","обнимает себя":"hugging herself",
+"держит за руку":"holding a hand","опирается на стену":"leaning against a wall","опирается на стол":"leaning on a desk",
+"сидит на подоконнике":"sitting on a windowsill","свесила ноги":"legs dangling","поправляет очки":"adjusting glasses",
+"поправляет волосы":"tucking hair behind an ear","читает":"reading","пишет":"writing","рисует":"drawing","курит":"smoking","пьёт":"drinking",
+"готовит":"cooking","спит":"asleep","просыпается":"just waking up","потягивается":"stretching","наклонилась":"leaning forward","присела":"crouching",
+"смотрит в окно":"looking out of a window","смотрит вверх":"looking up","машет рукой":"waving","указывает":"pointing","крупный план":"a close up",
+"средний план":"a medium shot","общий план":"a wide shot","по пояс":"from the waist up","в полный рост":"full body head to toe",
+"портрет":"a portrait","вид сверху":"seen from above","вид снизу":"seen from below","вид сзади":"seen from behind",
+"три четверти":"a three quarter view","профиль":"a profile view","анфас":"facing the viewer","через плечо":"an over the shoulder view",
+"от первого лица":"a first person point of view","динамичный ракурс":"a dynamic angle","эльф":"an elf","эльфийские уши":"long pointed elf ears",
+"острые уши":"pointed ears","гном":"a dwarf","орк":"an orc","тёмный эльф":"a dark elf","вампир":"a vampire","клыки":"sharp fangs",
+"когти":"clawed fingers","рога":"horns","короткие рога":"short horns","витые рога":"spiralling horns","оленьи рога":"antlers",
+"длинный хвост":"a long tail","пушистый хвост":"a fluffy tail","хвост демона":"a spaded demon tail","кошачьи уши":"cat ears","лисьи уши":"fox ears",
+"волчьи уши":"wolf ears","звериные лапы":"digitigrade legs","шерсть на теле":"fur across the body","чешуя":"scales","перья":"feathers",
+"крылья":"wings","кожистые крылья":"leathery wings","птичьи крылья":"feathered wings","нимб":"a halo","призрачное свечение":"a ghostly glow",
+"полупрозрачный":"semi transparent","тень вместо лица":"a face lost in shadow","щупальца":"tentacles","паутина":"cobwebs","русалка":"a mermaid",
+"рыбий хвост":"a fish tail","ведьма":"a witch","маг":"a mage","рыцарь":"a knight","жрица":"a priestess","наёмник":"a mercenary",
+"механическая рука":"a mechanical arm","протез":"a prosthetic limb","киберимплант":"a cybernetic implant","магический круг":"a glowing magic circle",
+"искры":"sparks","дым":"drifting smoke","пламя":"flames","лёд":"ice",
+/* --- 0.13: формы и возрасты --- */
+"шёлковая":"silk","шелковая":"silk","шёлковый":"silk","бархатная":"velvet","бархатный":"velvet","льняная":"linen","льняной":"linen","кожаная":"leather","кожаный":"leather","шерстяной":"wool","шерстяная":"wool","вязаная":"knitted","вязаный":"knitted","кружевная":"lace","атласная":"satin","серебристые волосы":"silver hair","серебристый":"silvery","серебристая":"silvery","серебристые":"silvery","пепельный":"ash","русый":"light brown","рыжий":"ginger","рыжая":"ginger","32 года":"thirty two years old","33 года":"thirty three years old","34 года":"thirty four years old","36 лет":"thirty six years old","37 лет":"thirty seven years old","38 лет":"thirty eight years old","39 лет":"thirty nine years old","40 лет":"forty years old","42 года":"forty two years old","45 лет":"forty five years old","50 лет":"fifty years old"
 };
 
 
@@ -814,6 +956,45 @@ function fillStyleSelect(){
 }
 function styleNote(){ $("style-note").textContent = getStyle($("f-style").value).note || ""; }
 
+
+/* ---------- варианты подсказок в полях ---------- */
+var PH = {
+"f-name":["Юна Кесслер","Вера Линд","Сенн Эшгроув","Марго Дей"],
+"f-look":[
+ "23 года, стройная, большие глаза, круглые очки, веснушки, тёмно-рыжие волосы, пучок",
+ "34 года, высокая, острые скулы, серые глаза, серебристые волосы, низкий пучок, выбившаяся прядь",
+ "26 лет, хрупкая, бледная кожа, янтарные глаза, витые рога, чёрные волосы до пояса",
+ "19 лет, худощавый, мягкие черты, зелёные глаза, светлые волосы, косая чёлка, лисьи уши"],
+"f-mood":[
+ "смущённая улыбка, сильный румянец, брови домиком",
+ "спокойствие, тяжёлый взгляд, сжатые губы",
+ "слёзы на щеках, сдерживает слёзы, отводит взгляд",
+ "злая ухмылка, прищур, поднятая бровь"],
+"f-wear":[
+ "кремовый свитер, плиссированная юбка, колготки, ботинки, сумка",
+ "серый костюм, красная шёлковая блузка, золотые часы, туфли",
+ "длинное платье, кружево, перчатки, медальон, диадема",
+ "худи, рваные джинсы, кроссовки, наушники на шее"],
+"f-pose":[
+ "облокотилась, подбородок поднят, смотрит в камеру",
+ "опирается на стол, смотрит вниз, руки на бёдрах",
+ "сидит на подоконнике, свесила ноги, смотрит в окно",
+ "оборачивается, тянется рукой, крупный план"],
+"f-scene":[
+ "кофейня, утро, свет из окна, чашки на стойке",
+ "офис, жалюзи, рабочий стол, настольная лампа, полки с книгами",
+ "библиотека, стеллаж, свечи, полумрак, пыль в воздухе",
+ "крыша, закат, город внизу, провода, ветер"]
+};
+function rollPlaceholders(){
+  var k,a;
+  for(k in PH){
+    if(!$(k)) continue;
+    a=PH[k];
+    $(k).placeholder=a[Math.floor(Math.random()*a.length)];
+  }
+}
+
 /* ---------- вкладки ---------- */
 var tabs=[["tab-edit","screen-edit"],["tab-out","screen-out"],["tab-dict","screen-dict"],["tab-style","screen-style"],["tab-page","screen-page"],["tab-list","screen-list"]];
 tabs.forEach(function(t){$(t[0]).addEventListener("click",function(){show(t[0])})});
@@ -854,7 +1035,8 @@ $("btn-clear").addEventListener("click",function(){
     return;
   }
   clearTimeout(clearTimer);clearArmed=false;b.textContent="Очистить поля";
-  TEXTFIELDS.forEach(function(k){$(k).value=""});
+  TEXTFIELDS.forEach(function(k){$(k).value="";grow($(k))});
+  rollPlaceholders();
   state.result=null;state.editingId=null;state.pending=[];
   paintPending();saveDraft();setStatus("st-build","");
   toast("Поля очищены");
@@ -875,29 +1057,35 @@ function allKeys(){
 function dictChanged(){KEYS_CACHE=null;paintDict()}
 
 function normalize(s){return String(s||"").toLowerCase().replace(/\s+/g," ").trim().replace(/[.,;!?]+$/,"")}
-var COLOR_RE=/^(black|white|grey|charcoal grey|red|deep burgundy|pink|warm orange|mustard yellow|gold|green|olive green|pale blue|deep blue|navy blue|teal|violet|brown|cream|rust orange|silver)\s+(a|an)\s+/;
-function tidyArticle(s){var m=s.match(COLOR_RE);return m? m[2]+" "+m[1]+" "+s.slice(m[0].length) : s}
+var ADJ_RE="(?:chocolate brown|mustard yellow|charcoal grey|deep burgundy|emerald green|olive green|rust orange|translucent|warm orange|dark green|mint green|sand beige|dark grey|deep blue|navy blue|pale blue|pale grey|pale pink|charcoal|dark red|lavender|crimson|knitted|leather|scarlet|silvery|bronze|copper|cotton|orange|purple|silver|velvet|violet|yellow|amber|beige|black|brown|cream|denim|green|ivory|lilac|linen|peach|satin|suede|white|blue|gold|grey|lace|pink|silk|teal|wool|ash|red)";
+var COLOR_RE=new RegExp("^((?:"+ADJ_RE+"\\s+)+)(a|an)\\s+");
+function tidyArticle(s){var m=s.match(COLOR_RE);return m? m[2]+" "+m[1]+s.slice(m[0].length) : s}
 
 function translateChunk(chunk, field, unknown){
   var A=allKeys(), MAP=A.map, KEYS=A.keys;
   var c=normalize(chunk);
   if(!c) return "";
   if(MAP[c]) return MAP[c];
-  var rest=c,out=[],used=false;
+  var work=c,hits=[],used=false;
   for(var i=0;i<KEYS.length;i++){
     var k=KEYS[i];
     if(k.length<4) continue;
-    if(rest.indexOf(k)!==-1){
-      out.push(MAP[k]);
-      rest=rest.split(k).join(" ").replace(/\s+/g," ").trim();
+    var idx=work.indexOf(k);
+    while(idx!==-1){
+      hits.push([idx,MAP[k]]);
+      work=work.slice(0,idx)+new Array(k.length+1).join(" ")+work.slice(idx+k.length);
       used=true;
-      if(!rest) break;
+      idx=work.indexOf(k);
     }
   }
+  hits.sort(function(a,b){return a[0]-b[0]});
+  var out=hits.map(function(h){return h[1]});
+  var rest=work.replace(/\s+/g," ").trim();
   if(!used){
     if(/[а-яё]/i.test(c)) unknown.push({phrase:chunk.trim(),norm:c,field:field,context:chunk.trim()});
     return chunk.trim();
   }
+  if(rest && rest.length<4) rest="";
   if(rest && /[а-яё]/i.test(rest)) unknown.push({phrase:rest,norm:rest,field:field,context:chunk.trim()});
   if(rest) out.push(rest);
   return tidyArticle(out.join(" "));
@@ -935,7 +1123,7 @@ function localBuild(v){
 var claudePromise = (window.claude && window.claude.use)
   ? window.claude.use("sample").catch(function(){return null})
   : Promise.resolve(null);
-claudePromise.then(function(s){ if(s) $("badge").textContent="0.12 · claude"; });
+claudePromise.then(function(s){ if(s) $("badge").textContent="0.13 · claude"; });
 
 function buildInstruction(v){
   var t=getStyle(v.style);
@@ -1289,7 +1477,9 @@ function paintList(){
         paintList();toast("Удалено");
       },180);
     });
-    li.appendChild(cd);li.appendChild(op);li.appendChild(dl);
+    var sh=document.createElement("button");sh.className="btn ghost small";sh.textContent="Поделиться";
+    sh.addEventListener("click",function(){shareChar(rec.id)});
+    li.appendChild(cd);li.appendChild(op);li.appendChild(sh);li.appendChild(dl);
     ul.appendChild(li);
   });
 }
@@ -2155,11 +2345,210 @@ function themeSheet(){
 }
 $("btn-theme").addEventListener("click",themeSheet);
 
+
+/* ================= 0.13: обмен персонажами ================= */
+function u8b64(u8){var s="",i;for(i=0;i<u8.length;i++)s+=String.fromCharCode(u8[i]);
+  return btoa(s).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"")}
+function b64u8(b){
+  b=String(b||"").replace(/-/g,"+").replace(/_/g,"/");
+  while(b.length%4)b+="=";
+  var s=atob(b),u=new Uint8Array(s.length),i;
+  for(i=0;i<s.length;i++)u[i]=s.charCodeAt(i);
+  return u;
+}
+function packObj(o,cb){
+  var bytes;
+  try{bytes=new TextEncoder().encode(JSON.stringify(o))}catch(e){cb(null);return}
+  if(typeof CompressionStream==="undefined"){cb("0"+u8b64(bytes));return}
+  try{
+    new Response(new Blob([bytes]).stream().pipeThrough(new CompressionStream("deflate-raw")))
+      .arrayBuffer().then(function(ab){cb("1"+u8b64(new Uint8Array(ab)))},function(){cb("0"+u8b64(bytes))});
+  }catch(e){cb("0"+u8b64(bytes))}
+}
+function unpackStr(code,cb){
+  code=String(code||"").trim();
+  var flag=code.charAt(0),body=code.slice(1),u;
+  try{u=b64u8(body)}catch(e){cb(null);return}
+  function done(bytes){
+    try{cb(JSON.parse(new TextDecoder().decode(bytes)))}catch(e){cb(null)}
+  }
+  if(flag==="0"){done(u);return}
+  if(flag!=="1"||typeof DecompressionStream==="undefined"){cb(null);return}
+  try{
+    new Response(new Blob([u]).stream().pipeThrough(new DecompressionStream("deflate-raw")))
+      .arrayBuffer().then(function(ab){done(new Uint8Array(ab))},function(){cb(null)});
+  }catch(e){cb(null)}
+}
+
+function cleanRec(rec,withShots){
+  return {name:rec.name,style:rec.style,form:rec.form||{},result:rec.result||{},
+          card:rec.card||{bio:"",pers:"",scen:"",greet:""},
+          shots:withShots?(rec.shots||[]):[]};
+}
+function payloadOne(rec,withShots){
+  return {app:"forge",kind:"char",v:1,made:new Date().toISOString().slice(0,10),char:cleanRec(rec,withShots)};
+}
+function payloadAll(withShots){
+  return {app:"forge",kind:"chars",v:1,made:new Date().toISOString().slice(0,10),
+          list:listGet().map(function(r){return cleanRec(r,withShots)})};
+}
+function baseUrl(){
+  var u=location.origin+location.pathname;
+  if(/^file:/.test(location.protocol)) u="";
+  return u;
+}
+function safeName(s){return String(s||"персонаж").replace(/[\\/:*?"<>|]+/g,"").trim().slice(0,40)||"персонаж"}
+
+function dl(blob,name){
+  var a=document.createElement("a"),u=URL.createObjectURL(blob);
+  a.href=u;a.download=name;document.body.appendChild(a);a.click();
+  setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(u)},400);
+}
+function sendFile(obj,name,label){
+  var txt=JSON.stringify(obj,null,1);
+  var blob=new Blob([txt],{type:"application/json"});
+  try{
+    var f=new File([blob],name,{type:"application/json"});
+    if(navigator.canShare&&navigator.canShare({files:[f]})&&navigator.share){
+      navigator.share({files:[f],title:label}).then(function(){},function(){dl(blob,name)});
+      return;
+    }
+  }catch(e){}
+  dl(blob,name);toast("Файл сохранён");
+}
+
+function shareChar(id){
+  var rec=findRec(id);if(!rec)return;
+  var opts={shots:false};
+  openSheet("Поделиться — "+rec.name,
+    "Ссылка открывается прямо в приложении у того, кому вы её отправили, и предлагает добавить персонажа в архив. Если приложение не установлено, ссылка откроется в браузере и сработает так же.\n\nФайл надёжнее: он переживает любой мессенджер, но получателю нужно открыть приложение и нажать «Добавить из файла».",
+    "",function(ex){
+      var box=document.createElement("div");
+      box.style.cssText="display:flex;flex-direction:column;gap:9px";
+
+      var lbl=document.createElement("label");
+      lbl.style.cssText="display:flex;align-items:center;gap:9px;text-transform:none;letter-spacing:0;font-size:14px;font-weight:500;color:var(--ink)";
+      var cb=document.createElement("input");cb.type="checkbox";cb.style.cssText="width:20px;height:20px;flex:0 0 auto";
+      cb.addEventListener("change",function(){opts.shots=cb.checked;size()});
+      lbl.appendChild(cb);lbl.appendChild(document.createTextNode("Вместе с изображениями"));
+      box.appendChild(lbl);
+
+      var note=document.createElement("p");note.className="hint";box.appendChild(note);
+      function size(){
+        packObj(payloadOne(rec,opts.shots),function(code){
+          if(!code){note.textContent="";return}
+          var n=code.length;
+          note.textContent="Размер: "+(n>1024?Math.round(n/1024)+" КБ":n+" знаков")+
+            (n>12000?" — для ссылки многовато, надёжнее файлом.":"");
+        });
+      }
+      size();
+
+      var b1=document.createElement("button");b1.className="btn";b1.textContent="Скопировать ссылку";
+      b1.addEventListener("click",function(){
+        if(!baseUrl()){toast("Ссылка работает только в установленном приложении");return}
+        packObj(payloadOne(rec,opts.shots),function(code){
+          if(!code){toast("Не удалось собрать ссылку");return}
+          var url=baseUrl()+"#c="+code;
+          if(navigator.share){
+            navigator.share({title:rec.name,text:"Персонаж для Штриховой мастерской",url:url})
+              .then(function(){},function(){copyText(url,"Ссылка скопирована")});
+          } else copyText(url,"Ссылка скопирована");
+        });
+      });
+      box.appendChild(b1);
+
+      var b2=document.createElement("button");b2.className="btn ghost";b2.textContent="Отправить файлом";
+      b2.addEventListener("click",function(){
+        sendFile(payloadOne(rec,opts.shots),safeName(rec.name)+".json","Персонаж "+rec.name);
+      });
+      box.appendChild(b2);
+      ex.appendChild(box);
+    });
+}
+
+/* ---------- приём ---------- */
+function addChars(arr){
+  var all=listGet(),added=0;
+  arr.forEach(function(c){
+    if(!c||!c.name)return;
+    var nm=c.name,n=2;
+    while(all.some(function(x){return x.name===nm})){nm=c.name+" ("+n+")";n++}
+    all.unshift({id:"c"+Date.now()+"_"+added,name:nm,style:c.style||"dark",
+      form:c.form||{},result:c.result||{},
+      card:c.card||{bio:"",pers:"",scen:"",greet:""},
+      shots:c.shots||[],saved:new Date().toISOString()});
+    added++;
+  });
+  if(!added){toast("В файле нет персонажей");return}
+  if(listPut(all)){paintList();if(typeof pFillChars==="function")pFillChars();
+    toast(added===1?"Персонаж добавлен":"Добавлено: "+added);}
+}
+function askImport(o){
+  if(!o||o.app!=="forge"){toast("Это не файл персонажа");return}
+  var list=o.kind==="chars"?(o.list||[]):(o.char?[o.char]:[]);
+  if(!list.length){toast("В файле нет персонажей");return}
+  var names=list.map(function(c){return c.name}).join(", ");
+  var shots=list.reduce(function(a,c){return a+((c.shots||[]).length)},0);
+  openSheet(list.length===1?"Добавить персонажа?":"Добавить персонажей?",
+    names+(shots?"\n\nИзображений: "+shots:"")+"\n\nСуществующие записи не перезаписываются — при совпадении имени добавится копия с номером.",
+    "",function(ex){
+      var b=document.createElement("button");b.className="btn";
+      b.textContent=list.length===1?"Добавить в архив":"Добавить все ("+list.length+")";
+      b.addEventListener("click",function(){addChars(list);closeSheet();show("tab-list")});
+      ex.appendChild(b);
+    });
+}
+function readImportFile(file){
+  if(!file)return;
+  var fr=new FileReader();
+  fr.onload=function(){
+    var o=null;try{o=JSON.parse(String(fr.result))}catch(e){}
+    if(!o){
+      unpackStr(String(fr.result).trim(),function(p){p?askImport(p):toast("Файл не распознан")});
+      return;
+    }
+    askImport(o);
+  };
+  fr.onerror=function(){toast("Не удалось прочитать файл")};
+  fr.readAsText(file);
+}
+function checkIncoming(){
+  var raw=(location.hash||"")+"&"+(location.search||"");
+  var m=raw.match(/[#&?]c=([A-Za-z0-9\-_]+)/);
+  if(!m)return;
+  try{history.replaceState(null,"",location.pathname)}catch(e){}
+  unpackStr(m[1],function(o){o?askImport(o):toast("Ссылка повреждена или обрезана")});
+}
+
 /* ---------- старт ---------- */
 fillStyleSelect();loadDraft();fillStyleSelect();
 styleNote();modeNote();
 paintStyles();paintDict();paintList();paintPending();paintShots();
 applyTheme();enhanceAll();growAll();
+$("btn-import").addEventListener("click",function(){$("imp-file").click()});
+$("imp-file").addEventListener("change",function(){var f=this.files&&this.files[0];this.value="";readImportFile(f)});
+$("btn-import-link").addEventListener("click",function(){
+  openSheet("Вставить ссылку","Вставьте сюда ссылку или код, который вам прислали.","",function(ex){
+    var ta=document.createElement("textarea");ta.id="imp-paste";ta.placeholder="https://…#c=…";ta.style.minHeight="80px";
+    ex.appendChild(ta);
+    var b=document.createElement("button");b.className="btn";b.textContent="Добавить";
+    b.addEventListener("click",function(){
+      var v=ta.value.trim(),mm=v.match(/[#&?]c=([A-Za-z0-9\-_]+)/);
+      var code=mm?mm[1]:v;
+      if(!code){toast("Пусто");return}
+      unpackStr(code,function(p){p?askImport(p):toast("Не похоже на персонажа")});
+    });
+    ex.appendChild(b);
+  });
+});
+$("btn-export-all").addEventListener("click",function(){
+  if(!listGet().length){toast("Архив пуст");return}
+  sendFile(payloadAll(false),"Штриховая мастерская — архив.json","Архив персонажей");
+});
+checkIncoming();rollPlaceholders();
+window.addEventListener("hashchange",checkIncoming);
+
 pDraftLoad();pSyncTheme();pPaintThemes();pPaintAdd();pPaintBlocks();pPaintList();pFillChars();pPreview();
 window.addEventListener("resize",function(){if(!$("screen-out").hidden)autosizeAll()});
 </script>
