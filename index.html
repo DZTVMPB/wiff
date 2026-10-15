@@ -50,7 +50,7 @@ body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:
 .brand h1{font-family:var(--display);font-weight:400;font-size:24px;margin:0;line-height:1}
 .brand span{font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:var(--soft)}
 nav{display:flex;gap:0}
-nav button{flex:1;background:none;border:none;border-bottom:2px solid transparent;font-family:var(--body);font-size:12px;font-weight:600;color:var(--soft);padding:9px 1px;cursor:pointer;transition:color .18s ease,border-color .18s ease}
+nav button{flex:1;background:none;border:none;border-bottom:2px solid transparent;font-family:var(--body);font-size:11px;font-weight:600;color:var(--soft);padding:9px 0;cursor:pointer;transition:color .18s ease,border-color .18s ease}
 nav button[aria-selected="true"]{color:var(--accent);border-bottom-color:var(--accent)}
 nav button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
 nav .dot{display:inline-block;min-width:15px;padding:0 3px;margin-left:3px;background:var(--warn);color:var(--paper);border-radius:8px;font-size:10px;line-height:15px;vertical-align:1px}
@@ -109,6 +109,15 @@ h2.sec{font-family:var(--display);font-weight:400;font-size:23px;margin:0;line-h
 .shot{position:relative;width:88px;height:112px;border-radius:4px;overflow:hidden;border:1px solid var(--rule);background:var(--card);animation:slideIn .2s ease both}
 .shot img{width:100%;height:100%;object-fit:cover;display:block}
 .shot button{position:absolute;top:3px;right:3px;width:22px;height:22px;border-radius:11px;border:none;background:rgba(0,0,0,.62);color:#fff;font-size:14px;line-height:22px;padding:0;cursor:pointer}
+.row.tight>*{flex:1 1 74px}
+input[type=color]{-webkit-appearance:none;appearance:none;width:100%;height:38px;padding:0;border:1px solid var(--rule);border-radius:4px;background:var(--card);cursor:pointer}
+input[type=color]::-webkit-color-swatch-wrapper{padding:3px}
+input[type=color]::-webkit-color-swatch{border:none;border-radius:3px}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:28px;background:none;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:4px;background:var(--rule);border-radius:2px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:20px;height:20px;margin-top:-8px;border-radius:10px;background:var(--accent);border:none}
+input[type=range]::-moz-range-track{height:4px;background:var(--rule);border-radius:2px}
+input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:10px;background:var(--accent);border:none}
 #toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translate(-50%,16px);z-index:30;background:var(--ink);color:var(--paper);padding:11px 18px;border-radius:22px;font-size:14px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .2s ease,transform .2s ease;max-width:calc(100vw - 32px);text-align:center}
 #toast.on{opacity:1;transform:translate(-50%,0)}
 @media (prefers-reduced-motion: reduce){
@@ -119,12 +128,13 @@ h2.sec{font-family:var(--display);font-weight:400;font-size:23px;margin:0;line-h
 </head>
 <body>
 <div class="topbar">
-  <div class="brand"><h1>Штриховая мастерская</h1><span id="badge">v4 · офлайн</span></div>
+  <div class="brand"><h1>Штриховая мастерская</h1><span id="badge">0.11 · офлайн</span></div>
   <nav role="tablist">
     <button role="tab" id="tab-edit" aria-selected="true">Герой</button>
     <button role="tab" id="tab-out" aria-selected="false">Промпт</button>
     <button role="tab" id="tab-dict" aria-selected="false">Словарь<span class="dot" id="dict-dot" hidden></span></button>
     <button role="tab" id="tab-style" aria-selected="false">Стили</button>
+    <button role="tab" id="tab-page" aria-selected="false">Вёрстка</button>
     <button role="tab" id="tab-list" aria-selected="false">Архив</button>
   </nav>
 </div>
@@ -277,6 +287,7 @@ h2.sec{font-family:var(--display);font-weight:400;font-size:23px;margin:0;line-h
     <button class="btn ghost" id="btn-new-dark">Копия Dark</button>
     <button class="btn ghost" id="btn-new-casual">Копия Casual</button>
     <button class="btn ghost" id="btn-new-soft">Копия Soft</button>
+    <button class="btn ghost" id="btn-new-anime">Копия Anime</button>
   </div>
 
   <div id="style-editor" hidden>
@@ -333,8 +344,8 @@ h2.sec{font-family:var(--display);font-weight:400;font-size:23px;margin:0;line-h
 
     <div class="field" style="margin-top:16px">
       <div class="outhead"><label for="k-bio">Introduction (Bio)</label><span class="cnt" id="c-bio"></span></div>
-      <p class="hint">Витринное описание. Лимит платформы — 500 знаков.</p>
-      <textarea id="k-bio"></textarea>
+      <p class="hint">Витринное описание. Лимит — 15000 знаков.</p>
+      <textarea id="k-bio" style="min-height:140px"></textarea>
     </div>
     <div class="field">
       <label for="k-pers">Personality</label>
@@ -359,6 +370,92 @@ h2.sec{font-family:var(--display);font-weight:400;font-size:23px;margin:0;line-h
     </div>
     <div class="status" id="st-card"></div>
   </div>
+</div>
+
+<!-- ВЁРСТКА -->
+<div class="screen" id="screen-page" hidden>
+  <h2 class="sec">Страница персонажа</h2>
+  <p class="hint">Собирает HTML для раздела Introduction без кода. Только то, что сайт не режет: ни градиентов, ни одиночной боковой рамки, ни классов — всё в inline-стилях.</p>
+
+  <div class="field">
+    <label for="p-name">Название заготовки</label>
+    <input type="text" id="p-name" placeholder="Нико — витрина" autocomplete="off">
+  </div>
+
+  <div class="buildbox">
+    <label>Тема страницы</label>
+    <div class="row" id="p-themes"></div>
+    <div class="row tight">
+      <div class="field"><label for="p-bg">Фон</label><input type="color" id="p-bg"></div>
+      <div class="field"><label for="p-ink">Текст</label><input type="color" id="p-ink"></div>
+      <div class="field"><label for="p-acc">Акцент</label><input type="color" id="p-acc"></div>
+      <div class="field"><label for="p-card">Плашки</label><input type="color" id="p-card"></div>
+      <div class="field"><label for="p-rule">Рамки</label><input type="color" id="p-rule"></div>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label for="p-fs">Размер текста — <span id="p-fs-v">15</span> px</label>
+        <input type="range" id="p-fs" min="12" max="20" step="1">
+      </div>
+      <div class="field">
+        <label for="p-font">Шрифт</label>
+        <select id="p-font">
+          <option value="serif">С засечками</option>
+          <option value="sans">Без засечек</option>
+          <option value="mono">Моноширинный</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="p-pad">Поля — <span id="p-pad-v">22</span> px</label>
+        <input type="range" id="p-pad" min="0" max="34" step="2">
+      </div>
+      <div class="field">
+        <label for="p-rad">Скругление — <span id="p-rad-v">10</span> px</label>
+        <input type="range" id="p-rad" min="0" max="24" step="2">
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <h3 style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--soft);margin:0 0 7px">Добавить блок</h3>
+    <div class="row" id="p-add"></div>
+  </div>
+
+  <div class="row">
+    <button class="btn ghost small" id="btn-p-tpl">Готовый каркас витрины</button>
+    <button class="btn ghost small" id="btn-p-fold">Свернуть все</button>
+  </div>
+
+  <div id="p-blocks" style="display:flex;flex-direction:column;gap:10px;min-width:0"></div>
+  <div class="empty" id="p-empty">Блоков пока нет. Добавьте первый или возьмите готовый каркас.</div>
+
+  <div>
+    <div class="outhead"><h3>Предпросмотр</h3><span class="cnt" id="p-cnt"></span></div>
+    <iframe id="p-prev" title="Предпросмотр страницы" style="width:100%;border:1px solid var(--rule);border-radius:5px;background:#fff;height:240px;display:block"></iframe>
+  </div>
+
+  <div class="row">
+    <button class="btn" id="btn-p-copy">Скопировать HTML</button>
+    <button class="btn ghost" id="btn-p-save">Сохранить заготовку</button>
+    <button class="btn ghost" id="btn-p-code">Показать код</button>
+    <button class="btn danger" id="btn-p-clear">Очистить</button>
+  </div>
+
+  <textarea id="p-code" class="slab" hidden readonly style="min-height:120px;resize:vertical;overflow:auto"></textarea>
+
+  <div class="buildbox">
+    <label for="p-char">Записать в Introduction персонажа</label>
+    <select id="p-char"></select>
+    <button class="btn ghost" id="btn-p-attach">Записать в карточку</button>
+    <p class="hint">Перепишет поле Introduction (Bio) у выбранного персонажа в Архиве.</p>
+  </div>
+
+  <div class="status" id="st-page"></div>
+
+  <hr class="divider">
+  <h3 style="font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--soft);margin:0">Заготовки</h3>
+  <ul class="list" id="p-list"></ul>
+  <div class="empty" id="p-list-empty">Сохранённых заготовок нет.</div>
 </div>
 
 </main>
@@ -546,15 +643,36 @@ var BUILTIN = {
     neg:"blurry, low quality, deformed hands, extra fingers"
   },
   soft:{
-    id:"soft",name:"Soft — аниме, мягкая заливка",builtin:true,
-    note:"Толстый ровный контур, мягкая клеточная заливка, приглушённая палитра, крупные блестящие глаза, заметный румянец.",
-    app:"soft cel shaded anime illustration, thick clean black outline of even weight, smooth flat cel shading with soft shadow edges, muted desaturated palette, no texture, solo, one figure alone, full body head to toe, realistic adult proportions, detailed face, very large glossy eyes with bright highlights, small nose, heavy blush across the cheeks and nose, fine strand detail in the hair",
-    clo:"thick clean black outline, smooth cel shading, muted palette, soft simple fabric folds, one outfit",
-    wear:"no logos, no prints",
-    act:"soft cel shaded anime illustration, thick clean black outline, smooth cel shading, muted palette, cinematic comic panel framing",
-    end:"softly blurred background, cool ambient light, gentle vignette, no border, no frame, no text",
-    por:"soft cel shaded anime illustration, thick clean black outline, smooth cel shading, muted palette, very large glossy eyes with bright highlights, heavy blush",
-    neg:"blurry, low quality, deformed hands, extra fingers"
+    id:"soft",name:"Soft — цветной вебкомикс",builtin:true,
+    note:"Уверенный чёрный контур неровной толщины, плоские заливки без переходов, один яркий акцент. Фон рисуется предметами, а не пятнами.",
+    app:"loose inked webcomic illustration, fully coloured, black ink lineart with uneven line weight, flat solid colour fills, no gradients, no shading, muted palette with one bright accent colour, solo, one figure alone, full body head to toe, realistic adult proportions, expressive cartoon face, very large glossy eyes with bright highlights, heavy blush across the nose",
+    clo:"loose inked webcomic illustration, fully coloured, black ink lineart, flat solid colour fills, no gradients, no shading, simple loose fabric folds, one outfit",
+    wear:"flat solid colour, no logos",
+    act:"loose inked webcomic illustration, fully coloured, black ink lineart, flat solid colour fills, no rendering, comic panel",
+    end:"fully drawn inked background with real objects in the same flat colour style, no empty space, no gradients, no depth of field, no paper texture, no border, no frame, no text",
+    por:"loose inked webcomic illustration, fully coloured, black ink lineart with uneven line weight, flat solid colour fills, no gradients, expressive cartoon face, very large glossy eyes with bright highlights, heavy blush",
+    neg:"pencil sketch, uncoloured, lineart only, monochrome, greyscale, unfinished drawing, paper texture, sketchbook, 3d render, photorealistic, soft gradients, depth of field, blurry, low quality, deformed hands, extra fingers"
+  },
+  anime:{
+    id:"anime",name:"Anime — чистый рендер",builtin:true,
+    note:"Аккуратный аниме-арт: ровная линия, мягкие растяжки, объём и свет, проработанный фон. Минимум стилизации.",
+    app:"high quality anime digital illustration, clean crisp lineart, smooth soft shading with gradients, polished rendering, rich saturated colour, glossy highlights, volumetric form, solo, one figure alone, full body head to toe, realistic adult proportions, detailed expressive face, sharp eyes with bright highlights",
+    clo:"high quality anime digital illustration, clean lineart, smooth soft shading, realistic fabric folds and material texture, visible stitching and metal hardware, one outfit",
+    wear:"no logos",
+    act:"high quality anime digital illustration, clean lineart, smooth soft shading, cinematic lighting, detailed environment",
+    end:"a fully detailed rendered background, warm ambient light, soft depth of field, no border, no frame, no text",
+    por:"high quality anime digital illustration, clean crisp lineart, smooth soft shading, polished rendering, detailed face, sharp eyes with bright highlights, glossy skin highlights",
+    neg:"flat colour, sketchy lineart, rough sketch, unfinished drawing, uncoloured, monochrome, 3d render, photorealistic, blurry, low quality, deformed hands, extra fingers"  },
+  manga:{
+    id:"manga",name:"Манга — цвет на сером",builtin:true,
+    note:"Персонаж цветной, мир позади — плоский чёрно-белый скринтон. Скоростные линии и пузыри, набитые знаками вместо слов. Один ключевой цвет держит кадр.",
+    app:"manga illustration, black ink lineart with screentone halftone shading, the character fully coloured in rich saturated colour against a flat greyscale world, solo, one figure alone, full body head to toe, realistic adult proportions, entire head and face visible, sharp expressive face, a strong blush across the nose and ears, entire head and face visible",
+    clo:"manga illustration, black ink lineart with screentone halftone shading, the figure in full saturated colour against greyscale surroundings, entire head and face visible, realistic adult proportions, one outfit, the key garment colour is the brightest thing in the frame",
+    wear:"flat saturated colour, no logos",
+    act:"manga illustration, black ink lineart with screentone shading, the figure in full colour, everything behind her flat greyscale halftone, speed lines",
+    end:"a fully drawn greyscale background with real objects in black ink and halftone dots, small white manga balloons holding only exclamation and question marks, no words, no letters, no empty space, no border, no frame, no text",
+    por:"manga illustration, black ink lineart with screentone halftone shading, the character in full saturated colour against a flat greyscale world, sharp expressive face, a strong blush across the nose and ears",
+    neg:"3d render, photorealistic, soft gradients, blurry, low quality, deformed hands, extra fingers"
   }
 };
 var FIELD_NAMES = {look:"Внешность",mood:"Выражение",wear:"Одежда",pose:"Поза",scene:"Место"};
@@ -592,7 +710,7 @@ function getStyle(id){
   return u[id] || BUILTIN.dark;
 }
 function allStyles(){
-  var out=[getStyle("dark"),getStyle("casual"),getStyle("soft")],u=userStyles(),k;
+  var out=[getStyle("dark"),getStyle("casual"),getStyle("soft"),getStyle("anime"),getStyle("manga")],u=userStyles(),k;
   for(k in u) out.push(u[k]);
   return out;
 }
@@ -608,7 +726,7 @@ function fillStyleSelect(){
 function styleNote(){ $("style-note").textContent = getStyle($("f-style").value).note || ""; }
 
 /* ---------- вкладки ---------- */
-var tabs=[["tab-edit","screen-edit"],["tab-out","screen-out"],["tab-dict","screen-dict"],["tab-style","screen-style"],["tab-list","screen-list"]];
+var tabs=[["tab-edit","screen-edit"],["tab-out","screen-out"],["tab-dict","screen-dict"],["tab-style","screen-style"],["tab-page","screen-page"],["tab-list","screen-list"]];
 tabs.forEach(function(t){$(t[0]).addEventListener("click",function(){show(t[0])})});
 function show(id){
   tabs.forEach(function(t){
@@ -619,6 +737,7 @@ function show(id){
   });
   document.querySelector("main").scrollTop=0;
   if(id==="tab-out") setTimeout(autosizeAll,30);
+  if(id==="tab-page"){pFillChars();setTimeout(pPreview,30)}
 }
 
 function modeNote(){
@@ -726,7 +845,7 @@ function localBuild(v){
 var claudePromise = (window.claude && window.claude.use)
   ? window.claude.use("sample").catch(function(){return null})
   : Promise.resolve(null);
-claudePromise.then(function(s){ if(s) $("badge").textContent="v4 · claude"; });
+claudePromise.then(function(s){ if(s) $("badge").textContent="0.11 · claude"; });
 
 function buildInstruction(v){
   var t=getStyle(v.style);
@@ -990,6 +1109,7 @@ function cloneStyle(fromId){
 $("btn-new-dark").addEventListener("click",function(){cloneStyle("dark")});
 $("btn-new-casual").addEventListener("click",function(){cloneStyle("casual")});
 $("btn-new-soft").addEventListener("click",function(){cloneStyle("soft")});
+$("btn-new-anime").addEventListener("click",function(){cloneStyle("anime")});
 
 function openStyle(id){
   var s=getStyle(id);
@@ -1117,7 +1237,7 @@ $("btn-card-close").addEventListener("click",function(){
 });
 function countBio(){
   var n=$("k-bio").value.length;
-  var el=$("c-bio");el.textContent=n+" / 500";el.className="cnt"+(n>500?" over":"");
+  var el=$("c-bio");el.textContent=n+" / 15000";el.className="cnt"+(n>15000?" over":"");
 }
 $("k-bio").addEventListener("input",function(){countBio();setStatus("st-card","Есть несохранённые правки.")});
 ["k-pers","k-scen","k-greet"].forEach(function(k){
@@ -1206,10 +1326,505 @@ function paintShots(){
   });
 }
 
+
+/* ================= КОНСТРУКТОР СТРАНИЦ (вкладка «Вёрстка») ================= */
+
+var P_THEMES = [
+  {id:"night", name:"Ночь",    bg:"#15171c", ink:"#e4e2dd", acc:"#c9a227", card:"#1d2026", rule:"#2b2f37"},
+  {id:"ink",   name:"Бумага",  bg:"#f4f2ec", ink:"#1d1f22", acc:"#8a3324", card:"#ffffff", rule:"#ddd9ce"},
+  {id:"wine",  name:"Вино",    bg:"#1a1113", ink:"#ece3e0", acc:"#c4606a", card:"#241719", rule:"#362427"},
+  {id:"moss",  name:"Мох",     bg:"#131814", ink:"#e2e7df", acc:"#8fb37a", card:"#1b211c", rule:"#28301f"},
+  {id:"steel", name:"Сталь",   bg:"#161a1f", ink:"#dfe5ea", acc:"#6f9fc4", card:"#1e242b", rule:"#2a323a"},
+  {id:"sand",  name:"Песок",   bg:"#201b14", ink:"#efe6d6", acc:"#d99a4e", card:"#2a2419", rule:"#3b3225"}
+];
+
+var P_FONTS = {serif:"Georgia,'Times New Roman',serif", sans:"'Helvetica Neue',Arial,sans-serif", mono:"'Courier New',monospace"};
+
+/* описание блоков: поле = [ключ, подпись, тип, доп] */
+var P_TYPES = {
+  head:{name:"Заголовок", f:[
+    ["x","Текст","text"],
+    ["sz","Размер","sel",[["28","Очень большой"],["22","Большой"],["18","Средний"],["14","Малый"]]],
+    ["col","Цвет","color:acc"],
+    ["al","Выравнивание","al"],
+    ["cap","Разрядка заглавными","bool"]
+  ]},
+  text:{name:"Абзац", f:[
+    ["x","Текст","area"],
+    ["col","Цвет","color:ink"],
+    ["sz","Размер","sel",[["0","Как у страницы"],["13","Мелкий"],["17","Крупный"],["20","Очень крупный"]]],
+    ["al","Выравнивание","al"],
+    ["it","Курсивом","bool"]
+  ]},
+  panel:{name:"Плашка", f:[
+    ["h","Подзаголовок","text"],
+    ["x","Текст","area"],
+    ["bg","Фон","color:card"],
+    ["col","Цвет текста","color:ink"],
+    ["bd","Рамка","color:rule"],
+    ["al","Выравнивание","al"]
+  ]},
+  grid:{name:"Сетка свойств", f:[
+    ["x","Пары «метка | значение», по одной в строке","area"],
+    ["cols","Колонок","sel",[["2","Две"],["1","Одна"],["3","Три"]]],
+    ["bg","Фон ячеек","color:card"],
+    ["col","Цвет значения","color:ink"],
+    ["acc","Цвет метки","color:acc"],
+    ["bd","Рамка ячеек","color:rule"]
+  ]},
+  quote:{name:"Выноска", f:[
+    ["x","Текст","area"],
+    ["bg","Фон","color:card"],
+    ["col","Цвет текста","color:ink"],
+    ["acc","Полоска слева","color:acc"],
+    ["it","Курсивом","bool"]
+  ]},
+  chat:{name:"Реплики", f:[
+    ["x","Строки «кто: текст». Слово «я» — реплика справа","area"],
+    ["bg","Фон чужой реплики","color:card"],
+    ["bg2","Фон своей реплики","color:acc"],
+    ["col","Цвет текста","color:ink"],
+    ["names","Показывать имена","bool"]
+  ]},
+  list:{name:"Список", f:[
+    ["x","По одному пункту в строке","area"],
+    ["col","Цвет текста","color:ink"],
+    ["acc","Цвет маркера","color:acc"],
+    ["ord","Нумерованный","bool"]
+  ]},
+  tags:{name:"Теги", f:[
+    ["x","Через запятую","area"],
+    ["bg","Фон тега","color:card"],
+    ["col","Цвет текста","color:acc"],
+    ["bd","Рамка","color:rule"],
+    ["al","Выравнивание","al"]
+  ]},
+  img:{name:"Изображение", f:[
+    ["src","Ссылка (https://…)","text"],
+    ["w","Ширина","sel",[["100","Во всю ширину"],["80","80 %"],["60","60 %"],["40","40 %"]]],
+    ["rad","Скругление","sel",[["0","Как у страницы"],["2","Без скругления"],["8","8 px"],["999","Круг"]]],
+    ["al","Выравнивание","al"],
+    ["cap","Подпись снизу","text"]
+  ]},
+  rule:{name:"Разделитель", f:[
+    ["acc","Цвет","color:rule"],
+    ["th","Толщина","sel",[["1","1 px"],["2","2 px"],["3","3 px"]]],
+    ["w","Ширина","sel",[["100","Во всю ширину"],["60","60 %"],["30","30 %"]]],
+    ["al","Выравнивание","al"]
+  ]},
+  gap:{name:"Отступ", f:[
+    ["h","Высота","sel",[["8","8 px"],["16","16 px"],["28","28 px"],["44","44 px"]]]
+  ]}
+};
+
+var P_ORDER = ["head","text","panel","grid","quote","chat","list","tags","img","rule","gap"];
+
+var P_DEF = {
+  head:{x:"Имя персонажа", sz:"22", col:"", al:"center", cap:""},
+  text:{x:"Короткий абзац о персонаже. **Жирный** и *курсив* работают.", col:"", sz:"0", al:"left", it:""},
+  panel:{h:"Подзаголовок", x:"Текст плашки.", bg:"", col:"", bd:"", al:"left"},
+  grid:{x:"Возраст | 24\nРост | 178 см\nРабота | дизайнер\nЧего хочет | чтобы заметили", cols:"2", bg:"", col:"", acc:"", bd:""},
+  quote:{x:"Одна фраза, которая держит весь образ.", bg:"", col:"", acc:"", it:"1"},
+  chat:{x:"он: Ты занят в обед?\nя: Смотря кто спрашивает.\nон: Тогда я.", bg:"", bg2:"", col:"", names:"1"},
+  list:{x:"Первый пункт\nВторой пункт\nТретий пункт", col:"", acc:"", ord:""},
+  tags:{x:"флирт, офис, медленное сближение", bg:"", col:"", bd:"", al:"center"},
+  img:{src:"", w:"100", rad:"0", al:"center", cap:""},
+  rule:{acc:"", th:"1", w:"100", al:"center"},
+  gap:{h:"16"}
+};
+
+var pState = {theme:null, blocks:[], id:null, name:"", open:{}};
+
+function pStore(){ try{return JSON.parse(localStorage.getItem("forge-pages")||"[]")}catch(e){return []} }
+function pStorePut(a){ try{localStorage.setItem("forge-pages",JSON.stringify(a));return true}catch(e){toast("Не хватило памяти");return false} }
+function pDraftSave(){ try{localStorage.setItem("forge-page-draft",JSON.stringify({theme:pState.theme,blocks:pState.blocks,id:pState.id,name:$("p-name").value}))}catch(e){} }
+function pDraftLoad(){
+  var d=null; try{d=JSON.parse(localStorage.getItem("forge-page-draft")||"null")}catch(e){}
+  if(d&&d.theme&&d.blocks){pState.theme=d.theme;pState.blocks=d.blocks;pState.id=d.id||null;$("p-name").value=d.name||""}
+  else{ pState.theme=pTheme("night"); pState.blocks=[]; }
+}
+function pTheme(id){
+  var t=P_THEMES[0];
+  P_THEMES.forEach(function(x){if(x.id===id)t=x});
+  return {id:t.id,bg:t.bg,ink:t.ink,acc:t.acc,card:t.card,rule:t.rule,fs:15,font:"serif",pad:22,rad:10};
+}
+
+/* ---------- экранирование и мини-разметка ---------- */
+function pEsc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;") }
+function pRich(s){
+  var t=pEsc(s);
+  t=t.replace(/\*\*([^*]+)\*\*/g,"<b>$1</b>");
+  t=t.replace(/\*([^*\n]+)\*/g,"<i>$1</i>");
+  t=t.replace(/\n/g,"<br>");
+  return t;
+}
+function pLines(s){ return String(s||"").split("\n").map(function(x){return x.trim()}).filter(function(x){return x.length}) }
+function pC(v,fb){ return v?v:fb }
+
+/* ---------- сборка HTML ---------- */
+function pBlockHtml(b,T){
+  var al=b.al||"left", fs=T.fs, rad=T.rad;
+  switch(b.t){
+    case "head":{
+      var sz=parseInt(b.sz||"22",10);
+      var st="margin:0 0 10px;font-size:"+sz+"px;line-height:1.2;font-weight:700;color:"+pC(b.col,T.acc)+";text-align:"+al;
+      if(b.cap) st+=";letter-spacing:0.14em;text-transform:uppercase";
+      return '<h3 style="'+st+'">'+pRich(b.x)+"</h3>";
+    }
+    case "text":{
+      var s2=parseInt(b.sz||"0",10)||fs;
+      var st2="margin:0 0 12px;font-size:"+s2+"px;line-height:1.65;color:"+pC(b.col,T.ink)+";text-align:"+al;
+      if(b.it) st2+=";font-style:italic";
+      return '<p style="'+st2+'">'+pRich(b.x)+"</p>";
+    }
+    case "panel":{
+      var o='<div style="background:'+pC(b.bg,T.card)+";border:1px solid "+pC(b.bd,T.rule)+";border-radius:"+rad+"px;padding:14px 16px;margin:0 0 12px;text-align:"+al+'">';
+      if(b.h) o+='<div style="margin:0 0 7px;font-size:'+(fs-3)+"px;letter-spacing:0.1em;text-transform:uppercase;font-weight:700;color:"+pC(b.col,T.acc)+'">'+pRich(b.h)+"</div>";
+      if(b.x) o+='<div style="font-size:'+fs+"px;line-height:1.6;color:"+pC(b.col,T.ink)+'">'+pRich(b.x)+"</div>";
+      return o+"</div>";
+    }
+    case "grid":{
+      var n=parseInt(b.cols||"2",10);
+      var g='<div style="display:grid;grid-template-columns:repeat('+n+',1fr);gap:10px;margin:0 0 12px">';
+      pLines(b.x).forEach(function(ln){
+        var p=ln.split("|"), k=(p[0]||"").trim(), v=(p.slice(1).join("|")||"").trim();
+        g+='<div style="background:'+pC(b.bg,T.card)+";border:1px solid "+pC(b.bd,T.rule)+";border-radius:"+rad+'px;padding:11px 13px">';
+        if(k) g+='<div style="font-size:'+(fs-4)+"px;letter-spacing:0.1em;text-transform:uppercase;font-weight:700;color:"+pC(b.acc,T.acc)+";margin:0 0 4px\">"+pRich(k)+"</div>";
+        g+='<div style="font-size:'+fs+"px;line-height:1.45;color:"+pC(b.col,T.ink)+'">'+pRich(v)+"</div></div>";
+      });
+      return g+"</div>";
+    }
+    case "quote":{
+      var st3="font-size:"+fs+"px;line-height:1.65;color:"+pC(b.col,T.ink)+(b.it?";font-style:italic":"");
+      return '<div style="display:flex;gap:13px;background:'+pC(b.bg,T.card)+";border-radius:"+rad+'px;padding:14px 16px;margin:0 0 12px">'+
+             '<div style="flex:0 0 auto;width:3px;background:'+pC(b.acc,T.acc)+';border-radius:2px"></div>'+
+             '<div style="flex:1 1 auto;'+st3+'">'+pRich(b.x)+"</div></div>";
+    }
+    case "chat":{
+      var c='<div style="display:flex;flex-direction:column;gap:9px;margin:0 0 12px">';
+      pLines(b.x).forEach(function(ln){
+        var i=ln.indexOf(":"), who=i>0?ln.slice(0,i).trim():"", tx=i>0?ln.slice(i+1).trim():ln;
+        var mine=/^(я|i|me|user|\{\{user\}\})$/i.test(who);
+        var bgc = mine ? pC(b.bg2,T.acc) : pC(b.bg,T.card);
+        var fgc = mine ? pC(b.col,T.bg) : pC(b.col,T.ink);
+        c+='<div style="display:flex;justify-content:'+(mine?"flex-end":"flex-start")+'">';
+        c+='<div style="max-width:82%;background:'+bgc+";border-radius:"+Math.max(rad,8)+'px;padding:9px 13px">';
+        if(b.names&&who) c+='<div style="font-size:'+(fs-5)+"px;letter-spacing:0.09em;text-transform:uppercase;font-weight:700;opacity:0.72;color:"+fgc+";margin:0 0 3px\">"+pEsc(who)+"</div>";
+        c+='<div style="font-size:'+fs+"px;line-height:1.5;color:"+fgc+'">'+pRich(tx)+"</div></div></div>";
+      });
+      return c+"</div>";
+    }
+    case "list":{
+      var tag=b.ord?"ol":"ul";
+      var l="<"+tag+' style="margin:0 0 12px;padding-left:22px;color:'+pC(b.acc,T.acc)+'">';
+      pLines(b.x).forEach(function(ln){
+        l+='<li style="margin:0 0 6px"><span style="font-size:'+fs+"px;line-height:1.55;color:"+pC(b.col,T.ink)+'">'+pRich(ln)+"</span></li>";
+      });
+      return l+"</"+tag+">";
+    }
+    case "tags":{
+      var box='<div style="display:flex;flex-wrap:wrap;gap:7px;margin:0 0 12px;justify-content:'+(b.al==="center"?"center":(b.al==="right"?"flex-end":"flex-start"))+'">';
+      String(b.x||"").split(",").map(function(x){return x.trim()}).filter(function(x){return x}).forEach(function(tg){
+        box+='<span style="display:inline-block;background:'+pC(b.bg,T.card)+";border:1px solid "+pC(b.bd,T.rule)+";border-radius:999px;padding:4px 11px;font-size:"+(fs-3)+"px;color:"+pC(b.col,T.acc)+'">'+pEsc(tg)+"</span>";
+      });
+      return box+"</div>";
+    }
+    case "img":{
+      if(!b.src) return "";
+      var r=b.rad==="0"?rad:parseInt(b.rad||"0",10);
+      var o2='<div style="margin:0 0 12px;text-align:'+(b.al||"center")+'">';
+      o2+='<img src="'+pEsc(b.src)+'" alt="" style="width:'+(b.w||"100")+"%;border-radius:"+r+'px;display:inline-block">';
+      if(b.cap) o2+='<div style="margin:6px 0 0;font-size:'+(fs-4)+"px;color:"+T.acc+'">'+pRich(b.cap)+"</div>";
+      return o2+"</div>";
+    }
+    case "rule":{
+      var w=b.w||"100", mg = b.al==="center" ? "0 auto" : (b.al==="right" ? "0 0 0 auto" : "0");
+      return '<div style="height:'+(b.th||"1")+"px;width:"+w+"%;background:"+pC(b.acc,T.rule)+";margin:"+mg+';margin-top:14px;margin-bottom:14px"></div>';
+    }
+    case "gap": return '<div style="height:'+(b.h||"16")+'px"></div>';
+  }
+  return "";
+}
+
+function pHtml(){
+  var T=pState.theme;
+  var out='<div style="background:'+T.bg+";color:"+T.ink+";font-family:"+P_FONTS[T.font||"serif"]+";font-size:"+T.fs+"px;line-height:1.6;padding:"+T.pad+"px;border-radius:"+T.rad+'px">';
+  pState.blocks.forEach(function(b){out+=pBlockHtml(b,T)});
+  return out+"</div>";
+}
+
+/* ---------- предпросмотр ---------- */
+function pPreview(){
+  var html=pHtml();
+  $("p-cnt").textContent=html.length+" знаков";
+  $("p-cnt").className="cnt"+(html.length>15000?" over":"");
+  if(!$("p-code").hidden) $("p-code").value=html;
+  var fr=$("p-prev");
+  fr.srcdoc='<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0;padding:0;background:'+pState.theme.bg+'">'+html+"</body></html>";
+  fr.onload=function(){
+    try{
+      var h=fr.contentDocument.body.scrollHeight;
+      fr.style.height=Math.max(140,Math.min(900,h+4))+"px";
+    }catch(e){}
+  };
+}
+
+/* ---------- редактор блоков ---------- */
+function pField(b,spec,i){
+  var key=spec[0], lab=spec[1], kind=spec[2], extra=spec[3];
+  var wrap=document.createElement("div");wrap.className="field";
+  var T=pState.theme;
+
+  if(kind.indexOf("color:")===0){
+    var token=kind.slice(6);
+    var head=document.createElement("div");head.className="outhead";
+    var lb=document.createElement("label");lb.textContent=lab;head.appendChild(lb);
+    var rs=document.createElement("button");rs.className="btn ghost small";rs.textContent=b[key]?"тема":"по теме";
+    rs.disabled=!b[key];
+    rs.addEventListener("click",function(){b[key]="";pMark();pPaintBlocks();});
+    head.appendChild(rs);wrap.appendChild(head);
+    var ci=document.createElement("input");ci.type="color";ci.value=b[key]||T[token]||"#888888";
+    ci.addEventListener("input",function(){b[key]=ci.value;pMark();pPreview();rs.disabled=false;rs.textContent="тема"});
+    wrap.appendChild(ci);
+    return wrap;
+  }
+
+  if(kind==="bool"){
+    var row=document.createElement("label");
+    row.style.cssText="display:flex;align-items:center;gap:9px;text-transform:none;letter-spacing:0;font-size:14px;font-weight:500;color:var(--ink)";
+    var cb=document.createElement("input");cb.type="checkbox";cb.checked=!!b[key];
+    cb.style.cssText="width:20px;height:20px;flex:0 0 auto";
+    cb.addEventListener("change",function(){b[key]=cb.checked?"1":"";pMark();pPreview()});
+    row.appendChild(cb);row.appendChild(document.createTextNode(lab));
+    wrap.appendChild(row);return wrap;
+  }
+
+  var lb2=document.createElement("label");lb2.textContent=lab;wrap.appendChild(lb2);
+
+  if(kind==="sel"){
+    var se=document.createElement("select");
+    (extra||[]).forEach(function(o){var op=document.createElement("option");op.value=o[0];op.textContent=o[1];se.appendChild(op)});
+    se.value=b[key]||(extra&&extra[0]?extra[0][0]:"");
+    se.addEventListener("change",function(){b[key]=se.value;pMark();pPreview()});
+    wrap.appendChild(se);return wrap;
+  }
+  if(kind==="al"){
+    var se2=document.createElement("select");
+    [["left","По левому краю"],["center","По центру"],["right","По правому краю"],["justify","По ширине"]].forEach(function(o){
+      var op=document.createElement("option");op.value=o[0];op.textContent=o[1];se2.appendChild(op)});
+    se2.value=b[key]||"left";
+    se2.addEventListener("change",function(){b[key]=se2.value;pMark();pPreview()});
+    wrap.appendChild(se2);return wrap;
+  }
+  if(kind==="area"){
+    var ta=document.createElement("textarea");ta.value=b[key]||"";ta.style.minHeight="90px";
+    ta.addEventListener("input",function(){b[key]=ta.value;pMark();pPreview()});
+    wrap.appendChild(ta);return wrap;
+  }
+  var ip=document.createElement("input");ip.type="text";ip.value=b[key]||"";ip.autocomplete="off";
+  ip.addEventListener("input",function(){b[key]=ip.value;pMark();pPreview()});
+  wrap.appendChild(ip);return wrap;
+}
+
+function pPaintBlocks(){
+  var box=$("p-blocks");box.innerHTML="";
+  $("p-empty").hidden=pState.blocks.length>0;
+  pState.blocks.forEach(function(b,i){
+    if(!b.k) b.k="b"+Date.now()+"_"+i;
+    var open = pState.open[b.k]!==false;
+    var card=document.createElement("div");
+    card.style.cssText="background:var(--card);border:1px solid var(--rule);border-radius:5px;padding:11px 12px;display:flex;flex-direction:column;gap:9px;min-width:0";
+
+    var head=document.createElement("div");
+    head.style.cssText="display:flex;align-items:center;gap:7px;flex-wrap:wrap;min-width:0";
+    var tw=document.createElement("button");
+    tw.className="btn ghost small";tw.textContent=open?"▾":"▸";tw.style.flex="0 0 auto";
+    tw.addEventListener("click",function(){pState.open[b.k]=!open;pPaintBlocks()});
+    var ttl=document.createElement("span");
+    ttl.style.cssText="flex:1 1 90px;min-width:0;font-weight:600;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap";
+    var pv=(b.x||b.h||b.src||"").replace(/\n/g," ").slice(0,30);
+    ttl.textContent=P_TYPES[b.t].name+(pv?" — "+pv:"");
+    head.appendChild(tw);head.appendChild(ttl);
+
+    [["↑",function(){if(i>0){var t=pState.blocks[i-1];pState.blocks[i-1]=b;pState.blocks[i]=t;pMark();pPaintBlocks();pPreview()}}],
+     ["↓",function(){if(i<pState.blocks.length-1){var t=pState.blocks[i+1];pState.blocks[i+1]=b;pState.blocks[i]=t;pMark();pPaintBlocks();pPreview()}}],
+     ["⧉",function(){var c=JSON.parse(JSON.stringify(b));c.k="b"+Date.now();pState.blocks.splice(i+1,0,c);pMark();pPaintBlocks();pPreview();toast("Блок скопирован")}],
+     ["×",function(){pState.blocks.splice(i,1);delete pState.open[b.k];pMark();pPaintBlocks();pPreview()}]
+    ].forEach(function(a){
+      var bt=document.createElement("button");bt.className="btn ghost small";bt.textContent=a[0];
+      bt.style.cssText="flex:0 0 auto;min-width:34px";bt.addEventListener("click",a[1]);head.appendChild(bt);
+    });
+    card.appendChild(head);
+
+    if(open){
+      P_TYPES[b.t].f.forEach(function(spec){card.appendChild(pField(b,spec,i))});
+    }
+    box.appendChild(card);
+  });
+}
+
+function pMark(){ setStatus("st-page","Есть несохранённые правки."); pDraftSave(); }
+
+function pAdd(t){
+  var b=JSON.parse(JSON.stringify(P_DEF[t]));b.t=t;b.k="b"+Date.now();
+  pState.blocks.push(b);pMark();pPaintBlocks();pPreview();
+  setTimeout(function(){$("p-blocks").lastChild.scrollIntoView({behavior:"smooth",block:"center"})},40);
+}
+
+function pPaintAdd(){
+  var box=$("p-add");box.innerHTML="";
+  P_ORDER.forEach(function(t){
+    var b=document.createElement("button");b.className="btn ghost small";b.textContent="+ "+P_TYPES[t].name;
+    b.addEventListener("click",function(){pAdd(t)});box.appendChild(b);
+  });
+}
+
+function pPaintThemes(){
+  var box=$("p-themes");box.innerHTML="";
+  P_THEMES.forEach(function(t){
+    var b=document.createElement("button");b.className="btn ghost small";b.textContent=t.name;
+    if(pState.theme && pState.theme.id===t.id) b.style.borderColor="var(--accent)";
+    b.addEventListener("click",function(){
+      var old=pState.theme;
+      pState.theme=pTheme(t.id);
+      pState.theme.fs=old.fs;pState.theme.font=old.font;pState.theme.pad=old.pad;pState.theme.rad=old.rad;
+      pSyncTheme();pMark();pPaintThemes();pPaintBlocks();pPreview();
+    });
+    box.appendChild(b);
+  });
+}
+
+function pSyncTheme(){
+  var T=pState.theme;
+  $("p-bg").value=T.bg;$("p-ink").value=T.ink;$("p-acc").value=T.acc;$("p-card").value=T.card;$("p-rule").value=T.rule;
+  $("p-fs").value=T.fs;$("p-fs-v").textContent=T.fs;
+  $("p-pad").value=T.pad;$("p-pad-v").textContent=T.pad;
+  $("p-rad").value=T.rad;$("p-rad-v").textContent=T.rad;
+  $("p-font").value=T.font||"serif";
+}
+
+[["p-bg","bg"],["p-ink","ink"],["p-acc","acc"],["p-card","card"],["p-rule","rule"]].forEach(function(a){
+  $(a[0]).addEventListener("input",function(){pState.theme[a[1]]=$(a[0]).value;pState.theme.id="";pMark();pPaintThemes();pPreview()});
+});
+[["p-fs","fs","p-fs-v"],["p-pad","pad","p-pad-v"],["p-rad","rad","p-rad-v"]].forEach(function(a){
+  $(a[0]).addEventListener("input",function(){
+    pState.theme[a[1]]=parseInt($(a[0]).value,10);$(a[2]).textContent=$(a[0]).value;pMark();pPreview();
+  });
+});
+$("p-font").addEventListener("change",function(){pState.theme.font=$("p-font").value;pMark();pPreview()});
+$("p-name").addEventListener("input",function(){pMark()});
+
+$("btn-p-fold").addEventListener("click",function(){
+  var anyOpen=pState.blocks.some(function(b){return pState.open[b.k]!==false});
+  pState.blocks.forEach(function(b){pState.open[b.k]=!anyOpen});
+  pPaintBlocks();
+});
+
+$("btn-p-code").addEventListener("click",function(){
+  var t=$("p-code");t.hidden=!t.hidden;
+  $("btn-p-code").textContent=t.hidden?"Показать код":"Скрыть код";
+  if(!t.hidden){t.value=pHtml()}
+});
+
+$("btn-p-copy").addEventListener("click",function(){ copyText(pHtml(),"HTML страницы скопирован") });
+
+$("btn-p-clear").addEventListener("click",function(){
+  pState.blocks=[];pState.open={};pState.id=null;$("p-name").value="";
+  pPaintBlocks();pPreview();pDraftSave();setStatus("st-page","");toast("Очищено");
+});
+
+$("btn-p-tpl").addEventListener("click",function(){
+  pState.blocks=[
+    {t:"head",k:"t1",x:"ИМЯ ПЕРСОНАЖА",sz:"22",col:"",al:"center",cap:"1"},
+    {t:"text",k:"t2",x:"*Одна строка-подзаголовок: кто это и чем держит внимание.*",col:"",sz:"13",al:"center",it:""},
+    {t:"rule",k:"t3",acc:"",th:"1",w:"40",al:"center"},
+    {t:"text",k:"t4",x:"Абзац живого описания. Что видно сразу, как держится, что в голосе. Два-три предложения, не больше.",col:"",sz:"0",al:"left",it:""},
+    {t:"grid",k:"t5",x:"Возраст | 24\nРост | 178 см\nЗанятие | дизайнер\nЧего хочет | чтобы заметили",cols:"2",bg:"",col:"",acc:"",bd:""},
+    {t:"panel",k:"t6",h:"Чего никто не спрашивает",x:"Одна вещь, которую персонаж прячет за своей маской.",bg:"",col:"",bd:"",al:"left"},
+    {t:"quote",k:"t7",x:"Фраза, которая держит весь образ.",bg:"",col:"",acc:"",it:"1"},
+    {t:"chat",k:"t8",x:"он: Ты занят в обед?\nя: Смотря кто спрашивает.\nон: Тогда считай, что я.",bg:"",bg2:"",col:"",names:"1"},
+    {t:"tags",k:"t9",x:"флирт, офис, медленное сближение",bg:"",col:"",bd:"",al:"center"},
+    {t:"rule",k:"t10",acc:"",th:"1",w:"40",al:"center"},
+    {t:"text",k:"t11",x:"*Закрывающая строка — приглашение в сцену.*",col:"",sz:"13",al:"center",it:""}
+  ];
+  pState.open={};pState.blocks.forEach(function(b){pState.open[b.k]=false});
+  pMark();pPaintBlocks();pPreview();toast("Каркас собран — правьте тексты");
+});
+
+/* ---------- заготовки ---------- */
+$("btn-p-save").addEventListener("click",function(){
+  if(!pState.blocks.length){toast("Нечего сохранять");return}
+  var nm=$("p-name").value.trim()||"Страница без названия";
+  var all=pStore();
+  var rec={id:pState.id||("p"+Date.now()),name:nm,theme:pState.theme,blocks:pState.blocks,saved:new Date().toISOString()};
+  pState.id=rec.id;
+  var a=all.filter(function(x){return x.id!==rec.id});a.unshift(rec);
+  if(pStorePut(a)){pPaintList();setStatus("st-page","");toast("Заготовка сохранена")}
+});
+
+function pPaintList(){
+  var a=pStore().sort(function(x,y){return (y.saved||"").localeCompare(x.saved||"")});
+  var ul=$("p-list");ul.innerHTML="";
+  $("p-list-empty").hidden=a.length>0;
+  a.forEach(function(rec){
+    var li=document.createElement("li");
+    if(rec.id===pState.id) li.className+=" sel";
+    var nm=document.createElement("span");nm.className="nm";nm.textContent=rec.name;
+    var sm=document.createElement("small");sm.textContent=(rec.blocks||[]).length+" блоков";nm.appendChild(sm);
+    li.appendChild(nm);
+    var op=document.createElement("button");op.className="btn ghost small";op.textContent="Открыть";
+    op.addEventListener("click",function(){
+      pState.theme=rec.theme;pState.blocks=JSON.parse(JSON.stringify(rec.blocks||[]));
+      pState.id=rec.id;$("p-name").value=rec.name;pState.open={};
+      pState.blocks.forEach(function(b){pState.open[b.k]=false});
+      pSyncTheme();pPaintThemes();pPaintBlocks();pPreview();pPaintList();pDraftSave();
+      setStatus("st-page","");toast("Открыто: "+rec.name);
+      $("p-name").scrollIntoView({behavior:"smooth",block:"start"});
+    });
+    var dl=document.createElement("button");dl.className="btn ghost small";dl.textContent="Удалить";
+    dl.addEventListener("click",function(){
+      li.classList.add("going");
+      setTimeout(function(){
+        pStorePut(pStore().filter(function(x){return x.id!==rec.id}));
+        if(pState.id===rec.id) pState.id=null;
+        pPaintList();toast("Удалено");
+      },180);
+    });
+    li.appendChild(op);li.appendChild(dl);ul.appendChild(li);
+  });
+}
+
+/* ---------- запись в карточку персонажа ---------- */
+function pFillChars(){
+  var sel=$("p-char"),cur=sel.value;sel.innerHTML="";
+  var a=listGet().sort(function(x,y){return (y.saved||"").localeCompare(x.saved||"")});
+  if(!a.length){
+    var o=document.createElement("option");o.value="";o.textContent="— нет сохранённых персонажей —";sel.appendChild(o);
+    $("btn-p-attach").disabled=true;return;
+  }
+  $("btn-p-attach").disabled=false;
+  a.forEach(function(rec){var o=document.createElement("option");o.value=rec.id;o.textContent=rec.name;sel.appendChild(o)});
+  if(cur&&a.some(function(x){return x.id===cur})) sel.value=cur;
+}
+$("btn-p-attach").addEventListener("click",function(){
+  var id=$("p-char").value;if(!id){toast("Персонаж не выбран");return}
+  var html=pHtml();
+  if(html.length>15000){toast("Больше 15000 знаков — не влезет");return}
+  var all=listGet(),ok=false,nm="";
+  all.forEach(function(x){if(x.id===id){x.card=x.card||{bio:"",pers:"",scen:"",greet:""};x.card.bio=html;ok=true;nm=x.name}});
+  if(!ok){toast("Персонаж не найден");return}
+  if(listPut(all)){
+    paintList();
+    if(state.cardId===id) $("k-bio").value=html, countBio();
+    toast("Записано в карточку: "+nm);
+  }
+});
+
 /* ---------- старт ---------- */
 fillStyleSelect();loadDraft();fillStyleSelect();
 styleNote();modeNote();
 paintStyles();paintDict();paintList();paintPending();paintShots();
+pDraftLoad();pSyncTheme();pPaintThemes();pPaintAdd();pPaintBlocks();pPaintList();pFillChars();pPreview();
 window.addEventListener("resize",function(){if(!$("screen-out").hidden)autosizeAll()});
 </script>
 

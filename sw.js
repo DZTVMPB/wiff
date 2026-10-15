@@ -1,5 +1,5 @@
 /* Офлайн-кэш. Поднимите номер версии, когда обновите index.html. */
-var CACHE = "forge-v4";
+var CACHE = "forge-v011";
 var FILES = [
   "./",
   "./index.html",
