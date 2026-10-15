@@ -19,14 +19,14 @@ img{max-width:100%}
 [hidden]{display:none!important}
 </style>
 <title>Штриховая мастерская</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Unbounded:wght@400;600&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
 /* Layout: phone-first single column, five screens swapped in place, toast pinned to the bottom */
 :root{
   --paper:#f0f1ed;--card:#ffffff;--ink:#16181a;--soft:#5a6066;--rule:#d6d9d1;
   --accent:#2b3dae;--accent-soft:#e4e7fa;--warn:#9a3412;--warn-soft:#fbeae1;--ok:#1f6f45;
   --on-accent:#ffffff;
-  --display:"Instrument Serif",Georgia,serif;
+  --display:"Unbounded","Instrument Serif",Georgia,sans-serif;
   --body:"Public Sans",system-ui,-apple-system,sans-serif;
   --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
 }
@@ -123,21 +123,87 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:10px;ba
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
 }
+/* ===== 0.12: скругления, нижняя панель, темы, подсказки ===== */
+:root{--r1:11px;--r2:15px;--r3:21px}
+:root[data-theme="pastel"]{
+  --paper:#f7f3f0;--card:#fffdfc;--ink:#403a44;--soft:#8d8494;--rule:#ebe1e5;
+  --accent:#b07aa8;--accent-soft:#f3e9f2;--warn:#c07a5a;--warn-soft:#f9ede5;--ok:#6fa88a;
+  --on-accent:#ffffff;color-scheme:light;
+}
+body{font-size:16px}
+main{padding:14px 14px calc(84px + env(safe-area-inset-bottom,0px))}
+
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--paper);border-bottom:1px solid var(--rule);padding:11px 14px 12px;display:block;gap:0}
+.brand{display:flex;flex-direction:column;align-items:center;gap:1px;text-align:center}
+.brand h1{font-family:var(--display);font-weight:600;font-size:19px;letter-spacing:-.01em;margin:0;line-height:1.15}
+.brand span{font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft)}
+.topbtn{position:absolute;top:9px;right:12px;width:38px;height:38px;border-radius:var(--r1);border:1px solid var(--rule);background:var(--card);color:var(--accent);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer}
+.topbtn:active{transform:scale(.94)}
+
+nav{position:fixed;left:0;right:0;bottom:0;z-index:12;display:flex;gap:0;background:var(--paper);border-top:1px solid var(--rule);padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px))}
+nav button{flex:1 1 0;min-width:0;background:none;border:none;border-bottom:none;display:flex;flex-direction:column;align-items:center;gap:2px;font-family:var(--body);font-size:9.5px;font-weight:600;color:var(--soft);padding:5px 1px 3px;cursor:pointer;border-radius:var(--r1);transition:color .18s ease}
+nav button .ico{display:flex;align-items:center;justify-content:center;width:46px;height:27px;border-radius:14px;transition:background .18s ease}
+nav button svg{width:21px;height:21px;display:block}
+nav button[aria-selected="true"]{color:var(--accent);border-bottom-color:transparent}
+nav button[aria-selected="true"] .ico{background:var(--accent-soft)}
+nav button span.tx{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+nav .dot{position:static;margin-left:3px}
+
+input[type=text],textarea,select{border-radius:var(--r1);padding:11px 13px}
+.btn{border-radius:var(--r1);padding:13px 16px}
+.btn.small{border-radius:9px}
+.buildbox{border-radius:var(--r3);padding:14px}
+ul.list li{border-radius:var(--r2);padding:12px 13px}
+ul.list li.sel{box-shadow:inset 3px 0 0 var(--accent)}
+.term,.shot,.empty{border-radius:var(--r2)}
+.flag{border-radius:var(--r2);border-left:none;border:1px solid var(--warn);padding:12px 14px}
+textarea.slab{border-radius:var(--r1);border-left:1px solid var(--rule);box-shadow:inset 3px 0 0 var(--accent)}
+.chip{border-radius:999px;padding:3px 9px}
+#toast{bottom:calc(88px + env(safe-area-inset-bottom,0px));border-radius:var(--r3)}
+
+.selwrap{position:relative;display:block;min-width:0}
+.selwrap svg{position:absolute;left:11px;top:50%;margin-top:-9px;width:18px;height:18px;color:var(--accent);pointer-events:none}
+.selwrap select{padding-left:37px}
+
+.lab{display:flex;align-items:center;gap:7px;min-width:0}
+.lab label{flex:1 1 auto;min-width:0;cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px;text-decoration-color:var(--rule)}
+.iconbtn{flex:0 0 auto;width:26px;height:26px;border-radius:8px;border:1px solid var(--rule);background:var(--card);color:var(--soft);font-size:13px;font-weight:700;line-height:1;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:color .15s ease,border-color .15s ease}
+.iconbtn:active{transform:scale(.92)}
+.iconbtn.on{color:var(--accent);border-color:var(--accent)}
+.iconbtn .chev{display:block;transition:transform .2s ease}
+.field.folded .iconbtn .chev{transform:rotate(-90deg)}
+.field.folded textarea,.field.folded input[type=text],.field.folded>.hint{display:none}
+.field.folded .lab label{text-decoration-color:var(--accent)}
+.foldnote{display:none;font-size:12.5px;color:var(--soft);font-style:italic;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.field.folded .foldnote{display:block}
+textarea.grow{resize:none;overflow:hidden}
+
+.sheet{position:fixed;inset:0;z-index:40;display:flex;align-items:flex-end}
+.sheet-bg{position:absolute;inset:0;background:rgba(0,0,0,.42);animation:fadeIn .18s ease both}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.sheet-body{position:relative;width:100%;max-height:86vh;overflow-y:auto;background:var(--paper);border-radius:var(--r3) var(--r3) 0 0;padding:10px 16px calc(18px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:11px;animation:slideUp .24s cubic-bezier(.22,.9,.3,1) both}
+@keyframes slideUp{from{transform:translateY(22px)}to{transform:none}}
+.sheet-grab{width:38px;height:4px;border-radius:2px;background:var(--rule);margin:2px auto 4px;flex:0 0 auto}
+.sheet-body h3{font-family:var(--display);font-weight:600;font-size:18px;margin:0;line-height:1.2}
+.sheet-body .txt{font-size:14.5px;line-height:1.6;color:var(--ink);margin:0;white-space:pre-line}
+.sheet-body .eg{font-size:13px;line-height:1.55;color:var(--soft);background:var(--card);border:1px solid var(--rule);border-radius:var(--r1);padding:10px 12px;margin:0}
+.themegrid{display:flex;flex-wrap:wrap;gap:8px}
+.themegrid button{flex:1 1 86px;min-width:0;border-radius:var(--r1);border:1px solid var(--rule);background:var(--card);color:var(--ink);font-family:var(--body);font-size:13px;font-weight:600;padding:9px 6px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px}
+.themegrid button.on{border-color:var(--accent);color:var(--accent)}
+.swatch{display:flex;gap:3px}
+.swatch i{width:13px;height:13px;border-radius:4px;border:1px solid rgba(128,128,128,.28)}
+
+h2.sec{font-size:17px;letter-spacing:-.01em;font-weight:600}
+.sheet-body h3{letter-spacing:-.01em}
 </style>
 
 </head>
 <body>
 <div class="topbar">
-  <div class="brand"><h1>Штриховая мастерская</h1><span id="badge">0.11 · офлайн</span></div>
-  <nav role="tablist">
-    <button role="tab" id="tab-edit" aria-selected="true">Герой</button>
-    <button role="tab" id="tab-out" aria-selected="false">Промпт</button>
-    <button role="tab" id="tab-dict" aria-selected="false">Словарь<span class="dot" id="dict-dot" hidden></span></button>
-    <button role="tab" id="tab-style" aria-selected="false">Стили</button>
-    <button role="tab" id="tab-page" aria-selected="false">Вёрстка</button>
-    <button role="tab" id="tab-list" aria-selected="false">Архив</button>
-  </nav>
+  <div class="brand"><h1>Штриховая мастерская</h1><span id="badge">0.12 · офлайн</span></div>
+  <button class="topbtn" id="btn-theme" aria-label="Оформление"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.6c-4.7 0-8.4 3.5-8.4 7.9 0 4.4 3.3 7.3 7.1 7.3 1.5 0 2.2-.8 2.2-1.8 0-.9-.7-1.4-.7-2.2 0-.8.6-1.4 1.5-1.4h1.6c3 0 5.1-2 5.1-5 0-3.1-3.4-4.8-8.4-4.8z"/><circle cx="7.7" cy="11.2" r="1.1" fill="currentColor" stroke="none"/><circle cx="11" cy="7.9" r="1.1" fill="currentColor" stroke="none"/><circle cx="15.4" cy="8.6" r="1.1" fill="currentColor" stroke="none"/></svg></button>
 </div>
+
 
 <main>
 
@@ -150,17 +216,18 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:10px;ba
 
   <div class="row">
     <div class="field">
-      <label for="f-style">Стиль рисовки</label>
-      <select id="f-style"></select>
-    </div>
-    <div class="field">
       <label for="f-sex">Персонаж</label>
-      <select id="f-sex">
+      <div class="selwrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.4"/><path d="M5.6 20c0-3.5 2.8-5.9 6.4-5.9s6.4 2.4 6.4 5.9"/></svg><select id="f-sex">
         <option value="woman">Женщина</option>
         <option value="man">Мужчина</option>
-      </select>
+      </select></div>
+    </div>
+    <div class="field">
+      <label for="f-style">Стиль рисовки</label>
+      <div class="selwrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.6c-4.7 0-8.4 3.5-8.4 7.9 0 4.4 3.3 7.3 7.1 7.3 1.5 0 2.2-.8 2.2-1.8 0-.9-.7-1.4-.7-2.2 0-.8.6-1.4 1.5-1.4h1.6c3 0 5.1-2 5.1-5 0-3.1-3.4-4.8-8.4-4.8z"/></svg><select id="f-style"></select></div>
     </div>
   </div>
+
   <p class="hint" id="style-note"></p>
 
   <hr class="divider">
@@ -460,6 +527,28 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:10px;ba
 
 </main>
 
+<nav role="tablist">
+  <button role="tab" id="tab-edit" aria-selected="true"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.4"/><path d="M5.6 20c0-3.5 2.8-5.9 6.4-5.9s6.4 2.4 6.4 5.9"/></svg></span><span class="tx">Герой</span></button>
+  <button role="tab" id="tab-out" aria-selected="false"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4.2" y="3.4" width="15.6" height="17.2" rx="2.6"/><path d="M8 8.4h8M8 12h8M8 15.6h4.6"/></svg></span><span class="tx">Промпт</span></button>
+  <button role="tab" id="tab-dict" aria-selected="false"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.6A1.6 1.6 0 015.6 4H11v16H5.6A1.6 1.6 0 014 18.4z"/><path d="M20 5.6A1.6 1.6 0 0018.4 4H13v16h5.4a1.6 1.6 0 001.6-1.6z"/></svg></span><span class="tx">Словарь<span class="dot" id="dict-dot" hidden></span></span></button>
+  <button role="tab" id="tab-style" aria-selected="false"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.4s5.9 6.2 5.9 10a5.9 5.9 0 11-11.8 0c0-3.8 5.9-10 5.9-10z"/></svg></span><span class="tx">Стили</span></button>
+  <button role="tab" id="tab-page" aria-selected="false"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.6" y="4" width="16.8" height="16" rx="2.6"/><path d="M3.6 9.4h16.8M9.4 9.4V20"/></svg></span><span class="tx">Вёрстка</span></button>
+  <button role="tab" id="tab-list" aria-selected="false"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.4" y="4" width="17.2" height="4.4" rx="1.6"/><path d="M5.2 8.4V18a2 2 0 002 2h9.6a2 2 0 002-2V8.4"/><path d="M10.2 12.4h3.6"/></svg></span><span class="tx">Архив</span></button>
+</nav>
+
+<div class="sheet" id="sheet" hidden>
+  <div class="sheet-bg" id="sheet-bg"></div>
+  <div class="sheet-body" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+    <div class="sheet-grab"></div>
+    <h3 id="sheet-title"></h3>
+    <p class="txt" id="sheet-txt"></p>
+    <p class="eg" id="sheet-eg" hidden></p>
+    <div id="sheet-extra"></div>
+    <button class="btn ghost" id="sheet-close">Закрыть</button>
+  </div>
+</div>
+
+
 <div id="toast" role="status" aria-live="polite"></div>
 
 <script>
@@ -738,6 +827,7 @@ function show(id){
   document.querySelector("main").scrollTop=0;
   if(id==="tab-out") setTimeout(autosizeAll,30);
   if(id==="tab-page"){pFillChars();setTimeout(pPreview,30)}
+  setTimeout(function(){growAll()},30);
 }
 
 function modeNote(){
@@ -845,7 +935,7 @@ function localBuild(v){
 var claudePromise = (window.claude && window.claude.use)
   ? window.claude.use("sample").catch(function(){return null})
   : Promise.resolve(null);
-claudePromise.then(function(s){ if(s) $("badge").textContent="0.11 · claude"; });
+claudePromise.then(function(s){ if(s) $("badge").textContent="0.12 · claude"; });
 
 function buildInstruction(v){
   var t=getStyle(v.style);
@@ -1229,6 +1319,9 @@ function openCard(id){
   $("k-bio").value=c.bio||"";$("k-pers").value=c.pers||"";
   $("k-scen").value=c.scen||"";$("k-greet").value=c.greet||"";
   countBio();paintShots();paintList();
+  enhanceAll();
+  ["k-bio","k-pers","k-scen","k-greet"].forEach(function(k){var f=$(k).closest(".field");if(f)f.classList.remove("folded")});
+  growAll($("card-editor"));
   $("card-editor").hidden=false;setStatus("st-card","");
   setTimeout(function(){$("card-editor").scrollIntoView({behavior:"smooth",block:"start"})},40);
 }
@@ -1661,6 +1754,7 @@ function pPaintBlocks(){
     }
     box.appendChild(card);
   });
+  growAll(box);
 }
 
 function pMark(){ setStatus("st-page","Есть несохранённые правки."); pDraftSave(); }
@@ -1820,10 +1914,252 @@ $("btn-p-attach").addEventListener("click",function(){
   }
 });
 
+
+/* ================= 0.12: подсказки, сворачивание, темы ================= */
+
+var HELP = {
+"f-name":["Имя персонажа","Нужно только для архива и для подписи над промптом. В сам промпт не попадает, так что писать можно по-русски и как угодно.","Вера Линд · Юна Кесслер · Безымянная травница"],
+"f-sex":["Персонаж","Задаёт базовые слова, с которых начинается каждый блок: adult woman или adult man. Если персонаж нечеловеческий, всё равно выберите ближайшее — остальное опишете во «Внешности».",""],
+"f-style":["Стиль рисовки","Главная настройка. Стиль подставляет свои опорные слова в начало каждого блока — именно он решает, выйдет штриховой рисунок, вебкомикс, аниме или манга. Описание выбранного стиля всегда видно строкой ниже.\n\nСвои стили создаются и правятся во вкладке «Стили».",""],
+"f-look":["Внешность","Возраст, телосложение, лицо, глаза, волосы. Через запятую, без предложений — приложение переводит фразы, а не текст.\n\nПорядок важен: что назовёте первым, то модель нарисует точнее. Начинайте с возраста и телосложения, заканчивайте мелочами.","23 года, стройная, большие глаза, круглые очки, веснушки, тёмно-рыжие волосы, пучок"],
+"f-mood":["Выражение","Лицо и эмоция в этом кадре. Один-два признака, не больше — иначе они начнут спорить друг с другом и получится гримаса.","смущённая улыбка, сильный румянец, брови домиком"],
+"f-wear":["Одежда и аксессуары","Четыре-шесть предметов, не больше. Длинные списки модель начинает терять и смешивать.\n\nЦвет главной вещи называйте прямо — он держит весь кадр. Если хотите, чтобы вещь была заметна, упомяните её и в «Позе» тоже.","кремовый свитер, плиссированная юбка, колготки, ботинки, холщовая сумка"],
+"f-pose":["Поза","Что персонаж делает и куда смотрит. Здесь же задаётся кадрирование: «в полный рост», «по пояс», «крупный план».\n\nБез позы модель почти всегда ставит фигуру прямо и по центру.","облокотилась на стойку, подбородок поднят, смотрит в камеру"],
+"f-scene":["Место","Фон. Называйте конкретные предметы, а не настроение: «кофейня, чашки, окно» работает, «уютная атмосфера» — нет.\n\nСлова вроде «простой фон» или «минимализм» модель понимает буквально и оставляет пустоту, поэтому их лучше не писать.","кофейня, утро, свет из окна, чашки на стойке"],
+"f-mode":["Способ сборки","Локально — перевод по встроенному словарю. Без интернета и без аккаунта, мгновенно. Непонятые фразы приложение покажет и предложит запомнить.\n\nЧерез Claude — перевод и переписывание в язык промптов. Нужен интернет и вход в Claude, тратит ваш лимит, но справляется с любыми формулировками.",""],
+"o-app":["Appearance","Блок внешности. Начинается опорными словами стиля, дальше идёт ваше описание. Это первый блок, который видит генератор, — он задаёт лицо и телосложение.\n\nПравки здесь сохраняются вместе с персонажем.",""],
+"o-clo":["Clothing & Accessories","Блок одежды. Отдельным кадром его запускать не стоит — слова про одежду тянут камеру вниз и срезают голову. Либо склейте с Appearance, либо используйте как дополнение.",""],
+"o-act":["Action & Background","Поза, действие и фон, плюс хвост стиля: запрет на рамки, надписи и пустоту. Самый длинный блок и самый важный для композиции.",""],
+"o-neg":["Negative Prompt","Короткий список того, чего быть не должно. Держим его коротким намеренно: многие площадки подклеивают негатив к основному промпту, и тогда всё из этого списка начинает появляться в кадре.\n\nВсе настоящие ограничения уже вшиты в положительные блоки словами «no border», «no text» и подобными.",""],
+"o-por":["Портрет","Укороченный вариант для аватарки: только стиль, лицо и выражение, без позы и фона.",""],
+"k-bio":["Introduction (Bio)","Витрина персонажа — то, что читают до начала чата. Лимит 15000 знаков.\n\nСюда же ложится HTML, собранный во вкладке «Вёрстка»: кнопка «Записать в карточку» перепишет это поле целиком.",""],
+"k-pers":["Personality","Характер, манера речи, отношение к пользователю и то, что персонаж прячет. Модель опирается на этот блок сильнее всего — чем конкретнее привычки и оговорки, тем живее выйдет диалог.",""],
+"k-scen":["Scenario","Постоянный контекст: место, время, расстановка сил, что уже произошло. Не сюжет, а декорации, которые не меняются.",""],
+"k-greet":["Greeting","Первое сообщение персонажа. Задаёт тон всему чату: как он пишет, насколько длинно, что делает руками.\n\nДействия — в *звёздочках*, речь — обычным текстом.",""]
+};
+
+function openHelp(id){
+  var h=HELP[id];if(!h)return;
+  openSheet(h[0],h[1],h[2],null);
+}
+
+/* ---------- нижняя шторка ---------- */
+function openSheet(title,txt,eg,buildExtra){
+  $("sheet-title").textContent=title;
+  $("sheet-txt").textContent=txt||"";
+  $("sheet-txt").hidden=!txt;
+  $("sheet-eg").textContent=eg||"";
+  $("sheet-eg").hidden=!eg;
+  var ex=$("sheet-extra");ex.innerHTML="";
+  if(buildExtra) buildExtra(ex);
+  $("sheet").hidden=false;
+}
+function closeSheet(){$("sheet").hidden=true}
+$("sheet-bg").addEventListener("click",closeSheet);
+$("sheet-close").addEventListener("click",closeSheet);
+document.addEventListener("keydown",function(e){if(e.key==="Escape"&&!$("sheet").hidden)closeSheet()});
+
+/* ---------- автоподгон высоты ---------- */
+function grow(el){
+  if(!el||el.id==="p-code")return;
+  el.style.height="auto";
+  el.style.height=(el.scrollHeight+2)+"px";
+}
+function growAll(root){
+  var ta=(root||document).getElementsByTagName("textarea");
+  for(var i=0;i<ta.length;i++){
+    if(ta[i].id==="p-code")continue;
+    ta[i].classList.add("grow");grow(ta[i]);
+  }
+}
+document.addEventListener("input",function(e){
+  var t=e.target;
+  if(t&&t.tagName==="TEXTAREA"&&t.id!=="p-code"){t.classList.add("grow");grow(t)}
+},true);
+
+/* ---------- подписи: подсказка по нажатию, сворачивание ---------- */
+function pressHelp(el,id){
+  var timer=null,fired=false;
+  el.addEventListener("pointerdown",function(){
+    fired=false;clearTimeout(timer);
+    timer=setTimeout(function(){fired=true;openHelp(id)},420);
+  });
+  ["pointerup","pointerleave","pointercancel"].forEach(function(ev){
+    el.addEventListener(ev,function(){clearTimeout(timer)});
+  });
+  el.addEventListener("click",function(e){e.preventDefault();if(!fired)openHelp(id)});
+  el.addEventListener("contextmenu",function(e){e.preventDefault()});
+}
+
+function foldNote(field,el){
+  var n=field.querySelector(".foldnote");if(!n)return;
+  var v=(el&&el.value||"").replace(/\s+/g," ").trim();
+  n.textContent=v?v.slice(0,70)+(v.length>70?"…":""):"пусто";
+}
+
+function enhanceField(id,foldable){
+  var el=$(id);if(!el)return;
+  var field=el.closest?el.closest(".field"):null;
+  if(!field||field.querySelector(".lab"))return;
+  var label=field.querySelector('label[for="'+id+'"]')||field.querySelector("label");
+  if(!label)return;
+  var lab;
+  if(label.parentNode!==field){ lab=label.parentNode; lab.classList.add("lab"); }
+  else { lab=document.createElement("div"); lab.className="lab"; field.insertBefore(lab,label); lab.appendChild(label); }
+
+  var hb=document.createElement("button");
+  hb.type="button";hb.className="iconbtn";hb.textContent="?";
+  hb.setAttribute("aria-label","Что сюда писать");
+  hb.addEventListener("click",function(e){e.preventDefault();openHelp(id)});
+  lab.appendChild(hb);
+
+  if(foldable){
+    var note=document.createElement("div");note.className="foldnote";field.appendChild(note);
+    var fb=document.createElement("button");
+    fb.type="button";fb.className="iconbtn";
+    fb.innerHTML='<span class="chev">⌄</span>';
+    fb.setAttribute("aria-label","Свернуть или раскрыть поле");
+    fb.addEventListener("click",function(e){
+      e.preventDefault();
+      field.classList.toggle("folded");
+      if(field.classList.contains("folded")) foldNote(field,el); else grow(el);
+    });
+    lab.appendChild(fb);
+    el.addEventListener("input",function(){if(field.classList.contains("folded"))foldNote(field,el)});
+  }
+  if(HELP[id]) pressHelp(label,id);
+}
+
+function enhanceHead(id){
+  var el=$(id);if(!el)return;
+  var box=el.closest?el.closest(".out"):null;if(!box)return;
+  var head=box.querySelector(".outhead");if(!head||head.querySelector(".iconbtn.q"))return;
+  var h3=head.querySelector("h3");if(!h3)return;
+  h3.style.cursor="pointer";
+  var hb=document.createElement("button");
+  hb.type="button";hb.className="iconbtn q";hb.textContent="?";
+  hb.setAttribute("aria-label","Что это за блок");
+  hb.addEventListener("click",function(e){e.preventDefault();openHelp(id)});
+  head.insertBefore(hb,head.children[1]||null);
+  pressHelp(h3,id);
+}
+
+function enhanceAll(){
+  ["f-name","f-sex","f-style","f-mode"].forEach(function(k){enhanceField(k,false)});
+  ["f-look","f-mood","f-wear","f-pose","f-scene"].forEach(function(k){enhanceField(k,true)});
+  ["k-bio","k-pers","k-scen","k-greet"].forEach(function(k){enhanceField(k,true)});
+  ["o-app","o-clo","o-act","o-neg","o-por"].forEach(enhanceHead);
+}
+
+/* ---------- оформление ---------- */
+var THEME_LIST=[
+  {id:"auto",   name:"Как в системе", sw:["#f0f1ed","#16181a","#2b3dae"]},
+  {id:"light",  name:"Светлая",       sw:["#f0f1ed","#ffffff","#2b3dae"]},
+  {id:"dark",   name:"Тёмная",        sw:["#121316","#1b1d20","#9aa8ff"]},
+  {id:"pastel", name:"Пастель",       sw:["#f7f3f0","#fffdfc","#b07aa8"]},
+  {id:"custom", name:"Своя",          sw:["#e9e4df","#ffffff","#7a6ad0"]}
+];
+var CUSTOM_DEF={paper:"#efe9e2",card:"#fffdfa",ink:"#2a2622",accent:"#8a6a4f",rule:"#ddd3c7"};
+
+function themeGet(){try{return localStorage.getItem("forge-theme")||"auto"}catch(e){return "auto"}}
+function themeSet(v){try{localStorage.setItem("forge-theme",v)}catch(e){}}
+function customGet(){
+  var c=null;try{c=JSON.parse(localStorage.getItem("forge-custom")||"null")}catch(e){}
+  if(!c)c={};
+  var o={},k;for(k in CUSTOM_DEF)o[k]=c[k]||CUSTOM_DEF[k];
+  return o;
+}
+function customSet(c){try{localStorage.setItem("forge-custom",JSON.stringify(c))}catch(e){}}
+
+function hx(c){
+  c=String(c||"").replace("#","");
+  if(c.length===3)c=c[0]+c[0]+c[1]+c[1]+c[2]+c[2];
+  return [parseInt(c.slice(0,2),16)||0,parseInt(c.slice(2,4),16)||0,parseInt(c.slice(4,6),16)||0];
+}
+function toHx(a){
+  return "#"+a.map(function(v){v=Math.max(0,Math.min(255,Math.round(v)));return (v<16?"0":"")+v.toString(16)}).join("");
+}
+function mix(a,b,t){var x=hx(a),y=hx(b);return toHx([x[0]+(y[0]-x[0])*t,x[1]+(y[1]-x[1])*t,x[2]+(y[2]-x[2])*t])}
+function lum(c){var a=hx(c);return (0.2126*a[0]+0.7152*a[1]+0.0722*a[2])/255}
+
+function applyTheme(){
+  var id=themeGet(),r=document.documentElement;
+  ["--paper","--card","--ink","--soft","--rule","--accent","--accent-soft","--on-accent"].forEach(function(v){r.style.removeProperty(v)});
+  if(id==="auto") r.removeAttribute("data-theme");
+  else if(id==="custom"){
+    var c=customGet(),dark=lum(c.paper)<0.42;
+    r.setAttribute("data-theme",dark?"dark":"light");
+    r.style.setProperty("--paper",c.paper);
+    r.style.setProperty("--card",c.card);
+    r.style.setProperty("--ink",c.ink);
+    r.style.setProperty("--rule",c.rule);
+    r.style.setProperty("--accent",c.accent);
+    r.style.setProperty("--soft",mix(c.ink,c.paper,0.46));
+    r.style.setProperty("--accent-soft",mix(c.accent,c.paper,0.84));
+    r.style.setProperty("--on-accent",lum(c.accent)>0.58?"#15171a":"#ffffff");
+  } else r.setAttribute("data-theme",id);
+  setTimeout(syncMeta,20);
+}
+function syncMeta(){
+  var paper=getComputedStyle(document.documentElement).getPropertyValue("--paper").trim();
+  if(!paper)return;
+  var ms=document.querySelectorAll('meta[name="theme-color"]');
+  for(var i=0;i<ms.length;i++){
+    if(themeGet()==="auto"){
+      var m=ms[i].getAttribute("media")||"";
+      if(!ms[i].dataset.orig) continue;
+      ms[i].setAttribute("content",ms[i].dataset.orig);
+    } else {
+      if(!ms[i].dataset.orig) ms[i].dataset.orig=ms[i].getAttribute("content")||"";
+      ms[i].setAttribute("content",paper);
+    }
+  }
+}
+
+function themeSheet(){
+  openSheet("Оформление","Цветовая схема приложения. «Как в системе» следует за настройкой телефона — светлая днём, тёмная ночью.","",function(ex){
+    var grid=document.createElement("div");grid.className="themegrid";
+    THEME_LIST.forEach(function(t){
+      var b=document.createElement("button");b.type="button";
+      if(themeGet()===t.id)b.className="on";
+      var sw=document.createElement("span");sw.className="swatch";
+      t.sw.forEach(function(c){var i=document.createElement("i");i.style.background=c;sw.appendChild(i)});
+      b.appendChild(sw);
+      var tx=document.createElement("span");tx.textContent=t.name;b.appendChild(tx);
+      b.addEventListener("click",function(){themeSet(t.id);applyTheme();themeSheet()});
+      grid.appendChild(b);
+    });
+    ex.appendChild(grid);
+
+    if(themeGet()!=="custom")return;
+    var c=customGet();
+    var wrap=document.createElement("div");
+    wrap.style.cssText="display:flex;flex-direction:column;gap:9px;margin-top:13px";
+    var hint=document.createElement("p");hint.className="hint";
+    hint.textContent="Остальные цвета — приглушённый текст, подложка акцента, цвет текста на кнопках — считаются сами.";
+    wrap.appendChild(hint);
+    var row=document.createElement("div");row.className="row tight";
+    [["paper","Фон"],["card","Плашки"],["ink","Текст"],["accent","Акцент"],["rule","Рамки"]].forEach(function(p){
+      var f=document.createElement("div");f.className="field";
+      var l=document.createElement("label");l.textContent=p[1];f.appendChild(l);
+      var i=document.createElement("input");i.type="color";i.value=c[p[0]];
+      i.addEventListener("input",function(){c[p[0]]=i.value;customSet(c);applyTheme()});
+      f.appendChild(i);row.appendChild(f);
+    });
+    wrap.appendChild(row);
+    var rst=document.createElement("button");rst.className="btn ghost";rst.type="button";rst.textContent="Сбросить к исходным";
+    rst.addEventListener("click",function(){customSet(JSON.parse(JSON.stringify(CUSTOM_DEF)));applyTheme();themeSheet()});
+    wrap.appendChild(rst);
+    ex.appendChild(wrap);
+  });
+}
+$("btn-theme").addEventListener("click",themeSheet);
+
 /* ---------- старт ---------- */
 fillStyleSelect();loadDraft();fillStyleSelect();
 styleNote();modeNote();
 paintStyles();paintDict();paintList();paintPending();paintShots();
+applyTheme();enhanceAll();growAll();
 pDraftLoad();pSyncTheme();pPaintThemes();pPaintAdd();pPaintBlocks();pPaintList();pFillChars();pPreview();
 window.addEventListener("resize",function(){if(!$("screen-out").hidden)autosizeAll()});
 </script>
