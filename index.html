@@ -196,12 +196,14 @@ textarea.grow{resize:none;overflow:hidden}
 
 h2.sec{font-size:17px;letter-spacing:-.01em;font-weight:600}
 .sheet-body h3{letter-spacing:-.01em}
+.spin{display:inline-block;width:13px;height:13px;margin-right:8px;vertical-align:-2px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;opacity:.75;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 </style>
 
 </head>
 <body>
 <div class="topbar">
-  <div class="brand"><h1>Штриховая мастерская</h1><span id="badge">0.15 · офлайн</span></div>
+  <div class="brand"><h1>Штриховая мастерская</h1><span id="badge">0.16 · офлайн</span></div>
   <button class="topbtn" id="btn-theme" aria-label="Оформление"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.6c-4.7 0-8.4 3.5-8.4 7.9 0 4.4 3.3 7.3 7.1 7.3 1.5 0 2.2-.8 2.2-1.8 0-.9-.7-1.4-.7-2.2 0-.8.6-1.4 1.5-1.4h1.6c3 0 5.1-2 5.1-5 0-3.1-3.4-4.8-8.4-4.8z"/><circle cx="7.7" cy="11.2" r="1.1" fill="currentColor" stroke="none"/><circle cx="11" cy="7.9" r="1.1" fill="currentColor" stroke="none"/><circle cx="15.4" cy="8.6" r="1.1" fill="currentColor" stroke="none"/></svg></button>
 </div>
 
@@ -1123,7 +1125,7 @@ function localBuild(v){
 var claudePromise = (window.claude && window.claude.use)
   ? window.claude.use("sample").catch(function(){return null})
   : Promise.resolve(null);
-claudePromise.then(function(s){ if(s) $("badge").textContent="0.15 · claude"; });
+claudePromise.then(function(s){ if(s) $("badge").textContent="0.16 · claude"; });
 
 function buildInstruction(v){
   var t=getStyle(v.style);
@@ -2425,11 +2427,42 @@ function sendFile(obj,name,label){
   sendBlob(new Blob([JSON.stringify(obj,null,1)],{type:"application/json"}),name,label);
 }
 
+function canShareFiles(f){
+  try{ return !!(navigator.canShare && navigator.share && navigator.canShare({files:[f]})); }
+  catch(e){ return false; }
+}
+function mkFile(text,name,type){
+  try{ return new File([text],name,{type:type}); }catch(e){ return null; }
+}
+/* Отправка заранее подготовленного файла. Вызывать ТОЛЬКО прямо из обработчика нажатия:
+   navigator.share теряет право на показ шторки, если между нажатием и вызовом успела пройти асинхронная работа. */
+function shareReady(file,blob,name){
+  if(file && canShareFiles(file)){
+    navigator.share({files:[file]}).then(
+      function(){toast("Отправлено")},
+      function(err){
+        if(err && err.name==="AbortError") return;
+        dl(blob,name);toast("Не отправилось — файл в Загрузках");
+      });
+    return;
+  }
+  dl(blob,name);
+  toast("Телефон не отправляет такие файлы — файл в Загрузках");
+}
+function spinBtn(btn,busy,label){
+  btn.disabled=!!busy;
+  btn.innerHTML="";
+  if(busy){var s=document.createElement("span");s.className="spin";btn.appendChild(s)}
+  btn.appendChild(document.createTextNode(label));
+}
+
 function shareChar(id){
   var rec=findRec(id);if(!rec)return;
   var opts={shots:false};
+  var ready=null;   /* {code,url,fits,parts,visBlob,visFile,jsonBlob,jsonFile} */
+
   openSheet("Поделиться — "+rec.name,
-    "Файл — самый надёжный путь: он переживает любой объём и любой мессенджер. Получателю нужно открыть приложение и нажать «Добавить из файла».\n\nСсылка удобнее, но Телеграм режет сообщения на 4096 знаков, и заполненная карточка туда не влезает. Приложение посчитает размер и подскажет.",
+    "Визитка — отдельная страница с персонажем и кнопкой «Добавить в мою мастерскую». Открывается у кого угодно, размер не ограничен.\n\nСсылка короче всего, но Телеграм режет сообщения на 4096 знаков, и заполненная карточка туда не влезает.",
     "",function(ex){
       var box=document.createElement("div");
       box.style.cssText="display:flex;flex-direction:column;gap:9px";
@@ -2437,60 +2470,104 @@ function shareChar(id){
       var lbl=document.createElement("label");
       lbl.style.cssText="display:flex;align-items:center;gap:9px;text-transform:none;letter-spacing:0;font-size:14px;font-weight:500;color:var(--ink)";
       var cb=document.createElement("input");cb.type="checkbox";cb.style.cssText="width:20px;height:20px;flex:0 0 auto";
-      cb.addEventListener("change",function(){opts.shots=cb.checked});
-      lbl.appendChild(cb);lbl.appendChild(document.createTextNode("Вложить изображения в файл"));
+      if(!(rec.shots||[]).length){cb.disabled=true}
+      lbl.appendChild(cb);
+      lbl.appendChild(document.createTextNode((rec.shots||[]).length?"Вложить изображения":"Изображений нет"));
       box.appendChild(lbl);
 
       var note=document.createElement("p");note.className="hint";
-      note.textContent="Считаю размер…";box.appendChild(note);
+      note.textContent="Готовлю файлы…";box.appendChild(note);
 
-      var bFile=document.createElement("button");bFile.className="btn";bFile.textContent="Отправить файлом";
-      bFile.addEventListener("click",function(){
-        sendFile(payloadOne(rec,opts.shots,false),safeName(rec.name)+".json","Персонаж "+rec.name);
-      });
-      box.appendChild(bFile);
-
-      var bVis=document.createElement("button");bVis.className="btn ghost";bVis.textContent="Отправить визиткой (HTML)";
-      bVis.addEventListener("click",function(){
-        packObj(payloadOne(rec,opts.shots,true),function(code){
-          if(!code){toast("Не удалось собрать визитку");return}
-          var html=visitkaHtml(rec,code);
-          sendBlob(new Blob([html],{type:"text/html;charset=utf-8"}),safeName(rec.name)+".html","Персонаж "+rec.name);
-        });
-      });
-      box.appendChild(bVis);
-
-      var bLink=document.createElement("button");bLink.className="btn ghost";bLink.textContent="Скопировать ссылку";
-      box.appendChild(bLink);
-
+      var bVis=document.createElement("button");bVis.className="btn";
+      var bFile=document.createElement("button");bFile.className="btn ghost";
+      var bLink=document.createElement("button");bLink.className="btn ghost";
       var bSplit=document.createElement("button");bSplit.className="btn ghost";bSplit.hidden=true;
-      bSplit.textContent="Разбить ссылку на части";
-      box.appendChild(bSplit);
+      box.appendChild(bVis);box.appendChild(bFile);box.appendChild(bLink);box.appendChild(bSplit);
+
+      var diag=document.createElement("p");diag.className="hint";
+      diag.style.marginTop="6px";box.appendChild(diag);
       ex.appendChild(box);
 
-      packObj(payloadOne(rec,false,true),function(code){
-        if(!code){note.textContent="Не удалось собрать ссылку.";bLink.disabled=true;return}
-        var url=(baseUrl()||"")+"#c="+code;
-        var n=url.length, fits=n<=TG_LIMIT;
-        note.textContent="Ссылка: "+(n>1024?(n/1024).toFixed(1)+" КБ":n+" знаков")+
-          (fits? " — помещается в одно сообщение Телеграма."
-               : " — в одно сообщение Телеграма (4096 знаков) не влезет. Отправьте файлом или разбейте на "+Math.ceil(code.length/PART_MAX)+" части.");
-        if(!fits){
-          bFile.textContent="Отправить файлом — так надёжнее";
-          bSplit.hidden=false;
-        }
-        bLink.addEventListener("click",function(){
-          if(!baseUrl()){toast("Ссылка работает только в установленном приложении");return}
-          if(navigator.share){
-            navigator.share({title:rec.name,text:"Персонаж для Штриховой мастерской",url:url})
-              .then(function(){},function(){copyText(url,"Ссылка скопирована")});
-          } else copyText(url,"Ссылка скопирована");
-        });
-        bSplit.addEventListener("click",function(){splitSheet(rec.name,code)});
+      /* нажатия вешаем сразу — они синхронные и читают уже готовое */
+      bVis.addEventListener("click",function(){
+        if(!ready)return;
+        shareReady(ready.visFile,ready.visBlob,safeName(rec.name)+".html");
       });
+      bFile.addEventListener("click",function(){
+        if(!ready)return;
+        shareReady(ready.jsonFile,ready.jsonBlob,safeName(rec.name)+".json");
+      });
+      bLink.addEventListener("click",function(){
+        if(!ready)return;
+        if(!ready.url){toast("Ссылка работает только в установленном приложении");return}
+        if(navigator.share){
+          navigator.share({title:rec.name,text:"Персонаж для Штриховой мастерской",url:ready.url}).then(
+            function(){},function(err){ if(!err||err.name!=="AbortError") copyText(ready.url,"Ссылка скопирована") });
+        } else copyText(ready.url,"Ссылка скопирована");
+      });
+      bSplit.addEventListener("click",function(){ if(ready&&ready.code) splitSheet(rec.name,ready.code) });
+
+      function prepare(){
+        ready=null;
+        spinBtn(bVis,true,"Готовлю визитку…");
+        spinBtn(bFile,true,"Готовлю файл…");
+        spinBtn(bLink,true,"Считаю ссылку…");
+        bSplit.hidden=true;
+        note.textContent="Готовлю файлы…";
+        packObj(payloadOne(rec,opts.shots,true),function(code){
+          if(!code){
+            note.textContent="Не удалось собрать файлы.";
+            spinBtn(bVis,false,"Визитка недоступна");
+            spinBtn(bFile,false,"Файл недоступен");
+            spinBtn(bLink,false,"Ссылка недоступна");
+            return;
+          }
+          var name=safeName(rec.name);
+          var html=visitkaHtml(rec,code);
+          var json=JSON.stringify(payloadOne(rec,opts.shots,false),null,1);
+          var base=baseUrl()||homeUrl();
+          var url=base?base+"#c="+code:"";
+          ready={
+            code:code, url:url,
+            visBlob:new Blob([html],{type:"text/html;charset=utf-8"}),
+            visFile:mkFile(html,name+".html","text/html"),
+            jsonBlob:new Blob([json],{type:"application/json"}),
+            jsonFile:mkFile(json,name+".json","application/json")
+          };
+          spinBtn(bVis,false,"Отправить визиткой");
+          spinBtn(bFile,false,"Отправить файлом .json");
+          var n=url.length, fits=url&&n<=TG_LIMIT;
+          spinBtn(bLink,false,fits?"Отправить ссылкой":"Скопировать ссылку");
+          note.textContent = !url
+            ? "Ссылка собирается только в установленном приложении — отправляйте визиткой."
+            : "Ссылка: "+(n>1024?(n/1024).toFixed(1)+" КБ":n+" знаков")+
+              (fits?" — помещается в одно сообщение Телеграма."
+                   :" — в одно сообщение Телеграма не влезет. Отправляйте визиткой или разбейте на "+Math.ceil(code.length/PART_MAX)+" части.");
+          bSplit.textContent="Разбить ссылку на части";
+          bSplit.hidden=!!fits||!url;
+
+          var okHtml=canShareFiles(ready.visFile), okJson=canShareFiles(ready.jsonFile);
+          diag.textContent="Телефон умеет: ссылки — "+(navigator.share?"да":"нет")+
+            " · визитку — "+(okHtml?"да":"нет, уйдёт в Загрузки")+
+            " · .json — "+(okJson?"да":"нет, уйдёт в Загрузки");
+          if(!okHtml&&okJson) bFile.className="btn", bVis.className="btn ghost";
+        });
+      }
+      cb.addEventListener("change",function(){opts.shots=cb.checked;prepare()});
+      prepare();
+
+      /* проверка, доехал ли до сервера манифест с «Поделиться» */
+      if(location.protocol.indexOf("http")===0){
+        fetch("./manifest.webmanifest",{cache:"no-store"}).then(function(r){return r.json()}).then(function(m){
+          var d2=document.createElement("p");d2.className="hint";
+          d2.textContent=m&&m.share_target
+            ? "Приём через «Поделиться» в манифесте есть. Если мастерской нет в системной шторке — переустановите приложение."
+            : "На сервере лежит старый манифест — приёма через «Поделиться» в нём нет. Залейте свежий пакет на GitHub.";
+          box.appendChild(d2);
+        }).catch(function(){});
+      }
     });
 }
-
 var TG_LIMIT=4096;
 var PART_MAX=3400;
 
