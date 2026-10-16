@@ -201,7 +201,7 @@ h2.sec{font-size:17px;letter-spacing:-.01em;font-weight:600}
 </head>
 <body>
 <div class="topbar">
-  <div class="brand"><h1>Штриховая мастерская</h1><span id="badge">0.13 · офлайн</span></div>
+  <div class="brand"><h1>Штриховая мастерская</h1><span id="badge">0.15 · офлайн</span></div>
   <button class="topbtn" id="btn-theme" aria-label="Оформление"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.6c-4.7 0-8.4 3.5-8.4 7.9 0 4.4 3.3 7.3 7.1 7.3 1.5 0 2.2-.8 2.2-1.8 0-.9-.7-1.4-.7-2.2 0-.8.6-1.4 1.5-1.4h1.6c3 0 5.1-2 5.1-5 0-3.1-3.4-4.8-8.4-4.8z"/><circle cx="7.7" cy="11.2" r="1.1" fill="currentColor" stroke="none"/><circle cx="11" cy="7.9" r="1.1" fill="currentColor" stroke="none"/><circle cx="15.4" cy="8.6" r="1.1" fill="currentColor" stroke="none"/></svg></button>
 </div>
 
@@ -402,7 +402,7 @@ h2.sec{font-size:17px;letter-spacing:-.01em;font-weight:600}
     <button class="btn ghost small" id="btn-import-link">Вставить ссылку</button>
     <button class="btn ghost small" id="btn-export-all">Выгрузить архив</button>
   </div>
-  <input type="file" id="imp-file" accept=".json,application/json,text/plain" hidden>
+  <input type="file" id="imp-file" accept=".json,.html,application/json,text/html,text/plain" hidden>
   <ul class="list" id="char-list"></ul>
   <div class="empty" id="list-empty">Пока пусто. Соберите персонажа и нажмите «Сохранить».</div>
 
@@ -1123,7 +1123,7 @@ function localBuild(v){
 var claudePromise = (window.claude && window.claude.use)
   ? window.claude.use("sample").catch(function(){return null})
   : Promise.resolve(null);
-claudePromise.then(function(s){ if(s) $("badge").textContent="0.13 · claude"; });
+claudePromise.then(function(s){ if(s) $("badge").textContent="0.15 · claude"; });
 
 function buildInstruction(v){
   var t=getStyle(v.style);
@@ -2380,17 +2380,24 @@ function unpackStr(code,cb){
   }catch(e){cb(null)}
 }
 
-function cleanRec(rec,withShots){
-  return {name:rec.name,style:rec.style,form:rec.form||{},result:rec.result||{},
-          card:rec.card||{bio:"",pers:"",scen:"",greet:""},
-          shots:withShots?(rec.shots||[]):[]};
+function cleanRec(rec,withShots,compact){
+  var card=rec.card||{},form=rec.form||{},o={name:rec.name,style:rec.style},f={},c={},k;
+  for(k in form) if(form[k]!==""&&form[k]!=null) f[k]=form[k];
+  o.form=f;
+  ["bio","pers","scen","greet"].forEach(function(x){if(card[x])c[x]=card[x]});
+  if(!compact||Object.keys(c).length) o.card=c;
+  if(withShots&&(rec.shots||[]).length) o.shots=rec.shots;
+  if(!compact) o.result=rec.result||{};
+  return o;
 }
-function payloadOne(rec,withShots){
-  return {app:"forge",kind:"char",v:1,made:new Date().toISOString().slice(0,10),char:cleanRec(rec,withShots)};
+function payloadOne(rec,withShots,compact){
+  var o={app:"forge",kind:"char",v:1,char:cleanRec(rec,withShots,compact)};
+  if(!compact) o.made=new Date().toISOString().slice(0,10);
+  return o;
 }
 function payloadAll(withShots){
   return {app:"forge",kind:"chars",v:1,made:new Date().toISOString().slice(0,10),
-          list:listGet().map(function(r){return cleanRec(r,withShots)})};
+          list:listGet().map(function(r){return cleanRec(r,withShots,false)})};
 }
 function baseUrl(){
   var u=location.origin+location.pathname;
@@ -2404,11 +2411,9 @@ function dl(blob,name){
   a.href=u;a.download=name;document.body.appendChild(a);a.click();
   setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(u)},400);
 }
-function sendFile(obj,name,label){
-  var txt=JSON.stringify(obj,null,1);
-  var blob=new Blob([txt],{type:"application/json"});
+function sendBlob(blob,name,label){
   try{
-    var f=new File([blob],name,{type:"application/json"});
+    var f=new File([blob],name,{type:blob.type||"application/octet-stream"});
     if(navigator.canShare&&navigator.canShare({files:[f]})&&navigator.share){
       navigator.share({files:[f],title:label}).then(function(){},function(){dl(blob,name)});
       return;
@@ -2416,12 +2421,15 @@ function sendFile(obj,name,label){
   }catch(e){}
   dl(blob,name);toast("Файл сохранён");
 }
+function sendFile(obj,name,label){
+  sendBlob(new Blob([JSON.stringify(obj,null,1)],{type:"application/json"}),name,label);
+}
 
 function shareChar(id){
   var rec=findRec(id);if(!rec)return;
   var opts={shots:false};
   openSheet("Поделиться — "+rec.name,
-    "Ссылка открывается прямо в приложении у того, кому вы её отправили, и предлагает добавить персонажа в архив. Если приложение не установлено, ссылка откроется в браузере и сработает так же.\n\nФайл надёжнее: он переживает любой мессенджер, но получателю нужно открыть приложение и нажать «Добавить из файла».",
+    "Файл — самый надёжный путь: он переживает любой объём и любой мессенджер. Получателю нужно открыть приложение и нажать «Добавить из файла».\n\nСсылка удобнее, но Телеграм режет сообщения на 4096 знаков, и заполненная карточка туда не влезает. Приложение посчитает размер и подскажет.",
     "",function(ex){
       var box=document.createElement("div");
       box.style.cssText="display:flex;flex-direction:column;gap:9px";
@@ -2429,45 +2437,130 @@ function shareChar(id){
       var lbl=document.createElement("label");
       lbl.style.cssText="display:flex;align-items:center;gap:9px;text-transform:none;letter-spacing:0;font-size:14px;font-weight:500;color:var(--ink)";
       var cb=document.createElement("input");cb.type="checkbox";cb.style.cssText="width:20px;height:20px;flex:0 0 auto";
-      cb.addEventListener("change",function(){opts.shots=cb.checked;size()});
-      lbl.appendChild(cb);lbl.appendChild(document.createTextNode("Вместе с изображениями"));
+      cb.addEventListener("change",function(){opts.shots=cb.checked});
+      lbl.appendChild(cb);lbl.appendChild(document.createTextNode("Вложить изображения в файл"));
       box.appendChild(lbl);
 
-      var note=document.createElement("p");note.className="hint";box.appendChild(note);
-      function size(){
-        packObj(payloadOne(rec,opts.shots),function(code){
-          if(!code){note.textContent="";return}
-          var n=code.length;
-          note.textContent="Размер: "+(n>1024?Math.round(n/1024)+" КБ":n+" знаков")+
-            (n>12000?" — для ссылки многовато, надёжнее файлом.":"");
-        });
-      }
-      size();
+      var note=document.createElement("p");note.className="hint";
+      note.textContent="Считаю размер…";box.appendChild(note);
 
-      var b1=document.createElement("button");b1.className="btn";b1.textContent="Скопировать ссылку";
-      b1.addEventListener("click",function(){
-        if(!baseUrl()){toast("Ссылка работает только в установленном приложении");return}
-        packObj(payloadOne(rec,opts.shots),function(code){
-          if(!code){toast("Не удалось собрать ссылку");return}
-          var url=baseUrl()+"#c="+code;
+      var bFile=document.createElement("button");bFile.className="btn";bFile.textContent="Отправить файлом";
+      bFile.addEventListener("click",function(){
+        sendFile(payloadOne(rec,opts.shots,false),safeName(rec.name)+".json","Персонаж "+rec.name);
+      });
+      box.appendChild(bFile);
+
+      var bVis=document.createElement("button");bVis.className="btn ghost";bVis.textContent="Отправить визиткой (HTML)";
+      bVis.addEventListener("click",function(){
+        packObj(payloadOne(rec,opts.shots,true),function(code){
+          if(!code){toast("Не удалось собрать визитку");return}
+          var html=visitkaHtml(rec,code);
+          sendBlob(new Blob([html],{type:"text/html;charset=utf-8"}),safeName(rec.name)+".html","Персонаж "+rec.name);
+        });
+      });
+      box.appendChild(bVis);
+
+      var bLink=document.createElement("button");bLink.className="btn ghost";bLink.textContent="Скопировать ссылку";
+      box.appendChild(bLink);
+
+      var bSplit=document.createElement("button");bSplit.className="btn ghost";bSplit.hidden=true;
+      bSplit.textContent="Разбить ссылку на части";
+      box.appendChild(bSplit);
+      ex.appendChild(box);
+
+      packObj(payloadOne(rec,false,true),function(code){
+        if(!code){note.textContent="Не удалось собрать ссылку.";bLink.disabled=true;return}
+        var url=(baseUrl()||"")+"#c="+code;
+        var n=url.length, fits=n<=TG_LIMIT;
+        note.textContent="Ссылка: "+(n>1024?(n/1024).toFixed(1)+" КБ":n+" знаков")+
+          (fits? " — помещается в одно сообщение Телеграма."
+               : " — в одно сообщение Телеграма (4096 знаков) не влезет. Отправьте файлом или разбейте на "+Math.ceil(code.length/PART_MAX)+" части.");
+        if(!fits){
+          bFile.textContent="Отправить файлом — так надёжнее";
+          bSplit.hidden=false;
+        }
+        bLink.addEventListener("click",function(){
+          if(!baseUrl()){toast("Ссылка работает только в установленном приложении");return}
           if(navigator.share){
             navigator.share({title:rec.name,text:"Персонаж для Штриховой мастерской",url:url})
               .then(function(){},function(){copyText(url,"Ссылка скопирована")});
           } else copyText(url,"Ссылка скопирована");
         });
+        bSplit.addEventListener("click",function(){splitSheet(rec.name,code)});
       });
-      box.appendChild(b1);
+    });
+}
 
-      var b2=document.createElement("button");b2.className="btn ghost";b2.textContent="Отправить файлом";
-      b2.addEventListener("click",function(){
-        sendFile(payloadOne(rec,opts.shots),safeName(rec.name)+".json","Персонаж "+rec.name);
+var TG_LIMIT=4096;
+var PART_MAX=3400;
+
+function splitCode(code){
+  var n=Math.ceil(code.length/PART_MAX),id=Math.random().toString(36).slice(2,7),out=[],i;
+  for(i=0;i<n;i++) out.push("ШМ "+id+" "+(i+1)+"/"+n+"\n"+code.substr(i*PART_MAX,PART_MAX));
+  return out;
+}
+function splitSheet(name,code){
+  var parts=splitCode(code);
+  openSheet("Части — "+name,
+    "Отправьте все "+parts.length+" частей отдельными сообщениями, в любом порядке. Получатель вставляет каждую в «Вставить ссылку», и когда придёт последняя, персонаж добавится сам.",
+    "",function(ex){
+      var box=document.createElement("div");box.style.cssText="display:flex;flex-direction:column;gap:9px";
+      parts.forEach(function(txt,i){
+        var b=document.createElement("button");b.className="btn ghost";
+        b.textContent="Скопировать часть "+(i+1)+" из "+parts.length;
+        b.addEventListener("click",function(){
+          if(navigator.share){
+            navigator.share({text:txt}).then(function(){b.classList.add("done");b.textContent="Отправлена часть "+(i+1)},
+              function(){copyText(txt,"Часть "+(i+1)+" скопирована");b.textContent="Скопирована часть "+(i+1)});
+          } else {
+            copyText(txt,"Часть "+(i+1)+" скопирована");b.textContent="Скопирована часть "+(i+1);
+          }
+        });
+        box.appendChild(b);
       });
-      box.appendChild(b2);
       ex.appendChild(box);
     });
 }
 
+/* сборка персонажа из частей */
+function partsGet(){try{return JSON.parse(localStorage.getItem("forge-parts")||"null")}catch(e){return null}}
+function partsPut(o){try{o?localStorage.setItem("forge-parts",JSON.stringify(o)):localStorage.removeItem("forge-parts")}catch(e){}}
+function takePart(txt){
+  var m=String(txt||"").match(/ШМ\s+([A-Za-z0-9]+)\s+(\d+)\s*\/\s*(\d+)\s*([\s\S]+)$/);
+  if(!m) return false;
+  var id=m[1],i=parseInt(m[2],10),n=parseInt(m[3],10),data=m[4].replace(/\s+/g,"");
+  if(!data||!n||i<1||i>n) return false;
+  var buf=partsGet();
+  if(!buf||buf.id!==id||buf.n!==n) buf={id:id,n:n,parts:{}};
+  buf.parts[i]=data;
+  var have=0,miss=[],k;
+  for(k=1;k<=n;k++){ if(buf.parts[k]) have++; else miss.push(k); }
+  if(have<n){
+    partsPut(buf);
+    toast("Часть "+i+" из "+n+" принята. Ждём: "+miss.join(", "));
+    return true;
+  }
+  var code="";for(k=1;k<=n;k++) code+=buf.parts[k];
+  partsPut(null);
+  unpackStr(code,function(p){p?askImport(p):toast("Части не сошлись — попросите прислать заново")});
+  return true;
+}
+
+
 /* ---------- приём ---------- */
+function rebuildResult(c){
+  if(c.result&&c.result.appearance) return c.result;
+  if(!c.form||!c.form.style&&!c.style) return c.result||{};
+  var keep=state.pending,res={};
+  try{
+    var v={};for(var k in c.form)v[k]=c.form[k];
+    if(!v.style)v.style=c.style||"dark";
+    if(!v.sex)v.sex="woman";
+    res=localBuild(v);
+  }catch(e){res=c.result||{}}
+  state.pending=keep;
+  return res;
+}
 function addChars(arr){
   var all=listGet(),added=0;
   arr.forEach(function(c){
@@ -2475,7 +2568,7 @@ function addChars(arr){
     var nm=c.name,n=2;
     while(all.some(function(x){return x.name===nm})){nm=c.name+" ("+n+")";n++}
     all.unshift({id:"c"+Date.now()+"_"+added,name:nm,style:c.style||"dark",
-      form:c.form||{},result:c.result||{},
+      form:c.form||{},result:rebuildResult(c),
       card:c.card||{bio:"",pers:"",scen:"",greet:""},
       shots:c.shots||[],saved:new Date().toISOString()});
     added++;
@@ -2503,12 +2596,7 @@ function readImportFile(file){
   if(!file)return;
   var fr=new FileReader();
   fr.onload=function(){
-    var o=null;try{o=JSON.parse(String(fr.result))}catch(e){}
-    if(!o){
-      unpackStr(String(fr.result).trim(),function(p){p?askImport(p):toast("Файл не распознан")});
-      return;
-    }
-    askImport(o);
+    if(!consumeIncomingText(String(fr.result))) toast("Файл не распознан");
   };
   fr.onerror=function(){toast("Не удалось прочитать файл")};
   fr.readAsText(file);
@@ -2521,6 +2609,119 @@ function checkIncoming(){
   unpackStr(m[1],function(o){o?askImport(o):toast("Ссылка повреждена или обрезана")});
 }
 
+
+/* ================= 0.15: визитка и приём через «Поделиться» ================= */
+function homeUrl(){
+  var u=baseUrl();
+  if(u) {try{localStorage.setItem("forge-home",u)}catch(e){}; return u}
+  try{return localStorage.getItem("forge-home")||""}catch(e){return ""}
+}
+function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
+
+function visitkaHtml(rec,code){
+  var card=rec.card||{}, st=getStyle(rec.style)||{}, res=rec.result||{};
+  var shot=(rec.shots||[])[0]||"";
+  var home=homeUrl(), link=home?home+"#c="+code:"";
+  var bio="";
+  if(card.bio){
+    bio = /<[a-z][\s\S]*>/i.test(card.bio)
+      ? card.bio
+      : "<p>"+esc(card.bio).replace(/\n{2,}/g,"</p><p>").replace(/\n/g,"<br>")+"</p>";
+  }
+  function fold(title,txt,mono){
+    if(!txt) return "";
+    return '<details><summary>'+esc(title)+'</summary><div class="'+(mono?"mono":"pre")+'">'+esc(txt)+'</div></details>';
+  }
+  var prompts="";
+  if(res.appearance||res.clothing||res.action){
+    prompts='<details><summary>Промпты для генератора</summary>'+
+      ['Appearance','Clothing & Accessories','Action & Background','Negative','Портрет'].map(function(t,i){
+        var v=[res.appearance,res.clothing,res.action,res.negative,res.portrait][i];
+        return v?'<div class="lbl">'+t+'</div><div class="mono">'+esc(v)+'</div>':"";
+      }).join("")+'</details>';
+  }
+  var head='<!doctype html><html lang="ru"><head><meta charset="utf-8">'+
+    '<meta name="viewport" content="width=device-width,initial-scale=1">'+
+    '<meta name="theme-color" content="#121316">'+
+    '<title>'+esc(rec.name)+' — Штриховая мастерская</title><style>'+
+    ':root{color-scheme:dark}'+
+    '*{box-sizing:border-box}'+
+    'body{margin:0;background:#121316;color:#e4e2dd;font:16px/1.6 Georgia,"Times New Roman",serif;padding:20px 16px 48px}'+
+    '.wrap{max-width:680px;margin:0 auto}'+
+    '.kicker{font:600 10px/1.4 Arial,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#8d8a84;text-align:center;margin:0 0 10px}'+
+    'h1{font:600 26px/1.2 Arial,sans-serif;letter-spacing:-.01em;margin:0 0 6px;text-align:center;color:#fff}'+
+    '.chip{display:block;text-align:center;font:600 11px/1 Arial,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#9aa8ff;margin:0 0 18px}'+
+    '.shot{display:block;width:100%;max-width:360px;margin:0 auto 20px;border-radius:14px}'+
+    '.go{display:block;background:#9aa8ff;color:#121316;text-decoration:none;font:700 17px/1 Arial,sans-serif;text-align:center;padding:16px;border-radius:13px;margin:0 0 10px}'+
+    '.go:active{opacity:.85}'+
+    '.hint{font:13px/1.55 Arial,sans-serif;color:#8d8a84;margin:0 0 20px;text-align:center}'+
+    '.panel{background:#1b1d20;border:1px solid #2b2f36;border-radius:14px;padding:16px 18px;margin:0 0 14px}'+
+    'details{background:#1b1d20;border:1px solid #2b2f36;border-radius:14px;padding:12px 16px;margin:0 0 10px}'+
+    'summary{cursor:pointer;font:600 13px/1.4 Arial,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#9aa8ff}'+
+    '.pre{white-space:pre-wrap;margin-top:10px}'+
+    '.mono{white-space:pre-wrap;word-break:break-word;font:12.5px/1.6 "Courier New",monospace;color:#c9c6c0;margin-top:8px}'+
+    '.lbl{font:700 10px/1.4 Arial,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#8d8a84;margin-top:12px}'+
+    'textarea{width:100%;min-height:90px;background:#16181b;color:#8d8a84;border:1px solid #2b2f36;border-radius:11px;padding:10px;font:11px/1.5 "Courier New",monospace}'+
+    '.foot{font:12px/1.6 Arial,sans-serif;color:#6f6c67;text-align:center;margin-top:26px}'+
+    'img{max-width:100%}'+
+    '</style></head><body><div class="wrap">';
+
+  var body='<p class="kicker">Персонаж для Штриховой мастерской</p>'+
+    '<h1>'+esc(rec.name)+'</h1>'+
+    '<span class="chip">'+esc((st.name||"").replace(/ —.*$/,""))+'</span>'+
+    (shot?'<img class="shot" src="'+esc(shot)+'" alt="">':"");
+
+  if(link){
+    body+='<a class="go" href="'+esc(link)+'">Добавить в мою мастерскую</a>'+
+      '<p class="hint">Кнопка откроет приложение и предложит добавить персонажа в архив. Если приложение не установлено, откроется страница — там всё работает так же.</p>';
+  } else {
+    body+='<p class="hint">Чтобы добавить персонажа, откройте приложение, вкладка «Архив» → «Вставить ссылку или часть», и вставьте код из конца страницы.</p>';
+  }
+
+  if(bio) body+='<div class="panel">'+bio+'</div>';
+  body+=fold("Personality",card.pers)+fold("Scenario",card.scen)+fold("Greeting",card.greet)+prompts;
+  body+='<details><summary>Код персонажа — на случай, если кнопка не сработала</summary>'+
+        '<p class="hint" style="text-align:left;margin:10px 0">Скопируйте целиком и вставьте в приложении: «Архив» → «Вставить ссылку или часть».</p>'+
+        '<textarea readonly onclick="this.select()">'+esc(code)+'</textarea></details>';
+  body+='<p class="foot">Файл создан в приложении «Штриховая мастерская».<br>Всё содержимое лежит внутри этого файла — интернет для чтения не нужен.</p>';
+  return head+body+'</div></body></html>';
+}
+
+/* единый разбор всего, что может прийти: файл, ссылка, часть, визитка, голый код */
+function consumeIncomingText(txt){
+  txt=String(txt||"").trim();
+  if(!txt) return false;
+  if(takePart(txt)) return true;
+  var m=txt.match(/[#&?]c=([A-Za-z0-9\-_]+)/);
+  if(m){ unpackStr(m[1],function(p){p?askImport(p):toast("Ссылка повреждена или обрезана")}); return true; }
+  if(txt.charAt(0)==="{"){
+    var o=null;try{o=JSON.parse(txt)}catch(e){}
+    if(o){ askImport(o); return true; }
+  }
+  var code=txt.replace(/\s+/g,"");
+  if(/^[01][A-Za-z0-9\-_]{20,}$/.test(code)){
+    unpackStr(code,function(p){p?askImport(p):toast("Не похоже на персонажа")});
+    return true;
+  }
+  return false;
+}
+
+/* приём из системного «Поделиться» */
+function checkShared(){
+  if(!/[?&]share=1/.test(location.search||"")) return;
+  try{history.replaceState(null,"",location.pathname)}catch(e){}
+  if(!window.caches) return;
+  caches.open("forge-share").then(function(c){
+    return c.match("./shared-payload").then(function(r){
+      if(!r){toast("Присланное не дошло — попробуйте ещё раз");return}
+      return r.text().then(function(t){
+        c.delete("./shared-payload");
+        if(!consumeIncomingText(t)) toast("Не удалось разобрать присланное");
+      });
+    });
+  }).catch(function(){});
+}
+
 /* ---------- старт ---------- */
 fillStyleSelect();loadDraft();fillStyleSelect();
 styleNote();modeNote();
@@ -2529,24 +2730,35 @@ applyTheme();enhanceAll();growAll();
 $("btn-import").addEventListener("click",function(){$("imp-file").click()});
 $("imp-file").addEventListener("change",function(){var f=this.files&&this.files[0];this.value="";readImportFile(f)});
 $("btn-import-link").addEventListener("click",function(){
-  openSheet("Вставить ссылку","Вставьте сюда ссылку или код, который вам прислали.","",function(ex){
-    var ta=document.createElement("textarea");ta.id="imp-paste";ta.placeholder="https://…#c=…";ta.style.minHeight="80px";
+  var buf=partsGet();
+  openSheet("Вставить ссылку или часть",
+    "Вставьте ссылку целиком или одну из частей, если персонажа прислали по кускам. Части принимаются в любом порядке."+
+    (buf?"\n\nСейчас собирается персонаж: есть "+Object.keys(buf.parts).length+" из "+buf.n+" частей.":""),
+    "",function(ex){
+    var ta=document.createElement("textarea");ta.id="imp-paste";ta.placeholder="https://…#c=…  или  ШМ a1b2 1/3 …";ta.style.minHeight="90px";
     ex.appendChild(ta);
     var b=document.createElement("button");b.className="btn";b.textContent="Добавить";
     b.addEventListener("click",function(){
-      var v=ta.value.trim(),mm=v.match(/[#&?]c=([A-Za-z0-9\-_]+)/);
-      var code=mm?mm[1]:v;
-      if(!code){toast("Пусто");return}
-      unpackStr(code,function(p){p?askImport(p):toast("Не похоже на персонажа")});
+      var v=ta.value.trim();
+      if(!v){toast("Пусто");return}
+      var before=partsGet();
+      if(!consumeIncomingText(v)){toast("Не похоже на персонажа");return}
+      var after=partsGet();
+      if(after&&(!before||before.id!==after.id||Object.keys(after.parts).length!==Object.keys(before.parts).length)) ta.value="";
     });
     ex.appendChild(b);
+    if(buf){
+      var d=document.createElement("button");d.className="btn danger";d.textContent="Забыть недособранного персонажа";
+      d.addEventListener("click",function(){partsPut(null);closeSheet();toast("Части удалены")});
+      ex.appendChild(d);
+    }
   });
 });
 $("btn-export-all").addEventListener("click",function(){
   if(!listGet().length){toast("Архив пуст");return}
   sendFile(payloadAll(false),"Штриховая мастерская — архив.json","Архив персонажей");
 });
-checkIncoming();rollPlaceholders();
+checkIncoming();checkShared();homeUrl();rollPlaceholders();
 window.addEventListener("hashchange",checkIncoming);
 
 pDraftLoad();pSyncTheme();pPaintThemes();pPaintAdd();pPaintBlocks();pPaintList();pFillChars();pPreview();
